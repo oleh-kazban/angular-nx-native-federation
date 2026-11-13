@@ -1,10 +1,27 @@
 <header class="shell-header">
-  <div class="brand">Client Portal</div>
-
-  <nav>
-    <a routerLink="/dashboard">Dashboard</a>
-    <a routerLink="/reports">Reports</a>
-  </nav>
+  <div class="header-content">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <div>
+        <span class="brand-name">Client Portal</span>
+        <span class="brand-caption">Federation demo</span>
+      </div>
+    </div>
+    <nav aria-label="Main navigation">
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page"
+        >Home</a
+      >
+      <a routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page"
+        >Dashboard</a
+      >
+      <a routerLink="/reports" routerLinkActive="active" ariaCurrentWhenActive="page">Reports</a>
+    </nav>
+    <span class="shell-label">Shell application</span>
+  </div>
 </header>
 
 <main class="shell-content">

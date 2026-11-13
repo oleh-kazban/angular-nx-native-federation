@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 import { type NativeFederationResult } from '@angular-architects/native-federation';
 
+import { HomePage } from './home-page';
 import { RemoteUnavailableComponent } from './remote-unavailable';
 
-export const appRoutes = (nf: NativeFederationResult): Routes => {
+export const appRoutes = (nf: Pick<NativeFederationResult, 'as'>): Routes => {
   const dashboardLoader = nf.as<{
     REMOTE_ROUTES: Routes;
   }>();
@@ -15,7 +16,7 @@ export const appRoutes = (nf: NativeFederationResult): Routes => {
   return [
     {
       path: '',
-      redirectTo: 'dashboard',
+      component: HomePage,
       pathMatch: 'full',
     },
     {
