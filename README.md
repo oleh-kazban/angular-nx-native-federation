@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="60" alt="Nx Logo" />
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://angular.dev/assets/images/press-kit/angular_icon_gradient.svg" width="60" alt="Angular Logo" />
+  <img src="https://raw.githubusercontent.com/angular/angular/main/adev/shared-docs/pipeline/tutorials/common/src/assets/angular.svg" width="60" alt="Angular Logo" />
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
 
 ---
 
-## 📌 Architectural Overview
+## Architectural Overview
 
 Modern Angular has transitioned to the official **Application Builder** (`@angular/build:application`), pairing **esbuild** for high-performance builds with **Vite** for local development. However, classical Webpack Module Federation relies on Webpack compiler internals, chunk-loading runtimes, and tapable hooks that cannot operate under an esbuild pipeline.
 
@@ -39,7 +39,7 @@ This repository serves as a production-hardened reference implementation demonst
 
 ---
 
-## 🏛 System Architecture & Topology
+## System Architecture & Topology
 
 ```mermaid
 flowchart TD
@@ -80,7 +80,7 @@ flowchart TD
 
 ---
 
-## 📸 Visual Showcase
+## Visual Showcase
 
 ### 1. Integrated Portal Experience (Shell Orchestration)
 
@@ -104,7 +104,7 @@ Each remote is a fully sovereign Angular application with its own bootstrap, rou
 
 ---
 
-## ⚡ Core Enterprise Highlights
+## Core Enterprise Highlights
 
 ### 1. Dynamic Host with Externalized Manifest
 
@@ -169,7 +169,7 @@ Remote failures do not cascade to crash the Shell. If a remote service goes down
 }
 ```
 
-## 🚀 Setup & Execution Guide
+## Setup & Execution Guide
 
 ### Prerequisites
 
@@ -234,7 +234,7 @@ The compiled output is located under `dist/apps/<app-name>/browser`, complete wi
 
 ---
 
-## 🛠 Code Quality, Verification & DX
+## Code Quality, Verification & DX
 
 | Task                  | Command               | Purpose                                                                |
 | :-------------------- | :-------------------- | :--------------------------------------------------------------------- |
@@ -248,7 +248,7 @@ The compiled output is located under `dist/apps/<app-name>/browser`, complete wi
 
 ---
 
-## 📖 Step-by-Step Monorepo Construction Reference
+## Step-by-Step Monorepo Construction Reference
 
 If you are reconstructing this architecture from scratch or adopting it in an existing enterprise repository:
 
@@ -266,7 +266,7 @@ If you are reconstructing this architecture from scratch or adopting it in an ex
 
 ---
 
-## 🔗 Official Documentation & References
+## Official Documentation & References
 
 - [Nx Documentation](https://nx.dev)
 - [Angular Builders & esbuild](https://angular.dev/tools/cli/build-system)
