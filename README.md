@@ -86,13 +86,13 @@ flowchart TD
 
 The Shell dynamically streams remote entries on navigation without full page reloads, mounting each remote into the Shell layout and navigation bar:
 
-|           Dashboard Remote in Shell           |          Reports Remote in Shell          |
-| :-------------------------------------------: | :---------------------------------------: |
-| ![Dashboard in Shell](docs/mfe-dashboard.png) | ![Reports in Shell](docs/mfe-reports.png) |
-
 |        Shell Home Landing        |
 | :------------------------------: |
 | ![Shell Landing](docs/shell.png) |
+
+|           Dashboard Remote in Shell           |          Reports Remote in Shell          |
+| :-------------------------------------------: | :---------------------------------------: |
+| ![Dashboard in Shell](docs/mfe-dashboard.png) | ![Reports in Shell](docs/mfe-reports.png) |
 
 ### 2. Standalone Execution (Independent Development)
 
