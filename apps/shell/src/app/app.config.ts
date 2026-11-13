@@ -4,10 +4,6 @@ import { type NativeFederationResult } from '@angular-architects/native-federati
 
 import { appRoutes } from './app.routes';
 
-export const appConfig = (
-  nf: NativeFederationResult,
-): ApplicationConfig => ({
-  providers: [
-    provideRouter(appRoutes(nf)),
-  ],
+export const appConfig = (nf: NativeFederationResult): ApplicationConfig => ({
+  providers: [provideRouter(appRoutes(nf))],
 });

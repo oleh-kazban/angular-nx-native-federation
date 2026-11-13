@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'remote-reports-page',
+  selector: 'app-remote-reports-page',
   standalone: true,
   template: `
     <section>

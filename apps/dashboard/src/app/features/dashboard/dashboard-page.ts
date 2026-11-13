@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'dashboard-page',
+  selector: 'app-dashboard-page',
   standalone: true,
   template: `
     <section>

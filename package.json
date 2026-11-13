@@ -7,7 +7,7 @@
     "start:shell": "nx serve shell",
     "start:dashboard": "nx serve dashboard",
     "start:reports": "nx serve reports",
-    "build:all": "nx run-many -t build -p shell dashboard reports --parallel=3",
+    "build:all": "nx run-many -t build --parallel=3",
     "build:dashboard": "nx build dashboard",
     "build:reports": "nx build reports",
     "build:shell": "nx build shell",

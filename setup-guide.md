@@ -1,33 +1,34 @@
 # Angular + Nx + Native Federation
+
 ## End-to-End Monorepo Setup Guide
 
 A practical guide for bootstrapping a production-oriented Angular monorepo with one Shell application and two independently built Micro Frontends.
 
 **Target architecture**
 
-| Application | Role | Local port |
-|---|---|---:|
-| `shell` | Host / Application Shell | 4200 |
-| `remote-dashboard` | Dashboard Micro Frontend | 4201 |
-| `remote-reports` | Reports Micro Frontend | 4202 |
+| Application        | Role                     | Local port |
+| ------------------ | ------------------------ | ---------: |
+| `shell`            | Host / Application Shell |       4200 |
+| `remote-dashboard` | Dashboard Micro Frontend |       4201 |
+| `remote-reports`   | Reports Micro Frontend   |       4202 |
 
 **Technology stack**
 
-| Area | Technology |
-|---|---|
-| Framework | Angular |
-| Language | TypeScript |
-| Monorepo | Nx 24 |
-| Package manager | pnpm |
-| Bundler | esbuild |
-| Dev server | Vite through Angular tooling |
-| Federation | `@angular-architects/native-federation` |
-| Runtime | Native Federation Orchestrator |
-| Linting | ESLint |
-| Formatting | Prettier |
-| Dependency analysis | Madge |
-| Git hooks | Husky + lint-staged |
-| Unit testing | Vitest |
+| Area                | Technology                              |
+| ------------------- | --------------------------------------- |
+| Framework           | Angular                                 |
+| Language            | TypeScript                              |
+| Monorepo            | Nx 24                                   |
+| Package manager     | pnpm                                    |
+| Bundler             | esbuild                                 |
+| Dev server          | Vite through Angular tooling            |
+| Federation          | `@angular-architects/native-federation` |
+| Runtime             | Native Federation Orchestrator          |
+| Linting             | ESLint                                  |
+| Formatting          | Prettier                                |
+| Dependency analysis | Madge                                   |
+| Git hooks           | Husky + lint-staged                     |
+| Unit testing        | Vitest                                  |
 
 The guide uses the Angular 22+ Native Federation v4 package naming. The federation adapter must match the installed Angular version.
 
@@ -67,17 +68,17 @@ pnpm dlx create-nx-workspace@latest client-portal
 
 Select the following options in the interactive setup:
 
-| Setting | Value |
-|---|---|
-| Stack | Angular |
-| Workspace type | Integrated Monorepo |
-| Application name | shell |
-| Bundler | esbuild |
-| Stylesheet | SCSS |
-| Linter | ESLint |
-| Unit test runner | Vitest |
-| Package manager | pnpm |
-| SSR | Disabled for the initial demo |
+| Setting          | Value                         |
+| ---------------- | ----------------------------- |
+| Stack            | Angular                       |
+| Workspace type   | Integrated Monorepo           |
+| Application name | shell                         |
+| Bundler          | esbuild                       |
+| Stylesheet       | SCSS                          |
+| Linter           | ESLint                        |
+| Unit test runner | Vitest                        |
+| Package manager  | pnpm                          |
+| SSR              | Disabled for the initial demo |
 
 Enter the workspace:
 
@@ -227,9 +228,7 @@ Expected alias:
 {
   "compilerOptions": {
     "paths": {
-      "@client-portal/shared/demo-contracts": [
-        "libs/shared/demo-contracts/src/index.ts"
-      ]
+      "@client-portal/shared/demo-contracts": ["libs/shared/demo-contracts/src/index.ts"]
     }
   }
 }
@@ -370,9 +369,9 @@ For example, development and production can use different remote URLs while shar
 
 Native Federation has two different sharing mechanisms:
 
-| Mechanism | Purpose |
-|---|---|
-| `shared` | npm dependencies from package.json |
+| Mechanism        | Purpose                                                 |
+| ---------------- | ------------------------------------------------------- |
+| `shared`         | npm dependencies from package.json                      |
 | `sharedMappings` | Workspace libraries referenced through TypeScript paths |
 
 We will configure both.
@@ -460,12 +459,7 @@ export default withNativeFederation({
     strictVersion: true,
     requiredVersion: 'auto',
   })
-    .skip([
-      'rxjs/ajax',
-      'rxjs/fetch',
-      'rxjs/testing',
-      'rxjs/webSocket',
-    ])
+    .skip(['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'])
     .patch(['@angular/*'], {
       includeSecondaries: {
         keepAll: true,
@@ -475,9 +469,7 @@ export default withNativeFederation({
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only([
-    '@client-portal/shared/demo-contracts',
-  ]),
+  }).only(['@client-portal/shared/demo-contracts']),
 });
 ```
 
@@ -504,8 +496,7 @@ export default withNativeFederation({
   name: 'remote-dashboard',
 
   exposes: {
-    './Routes':
-      './apps/remote-dashboard/src/app/remote-entry/entry.routes.ts',
+    './Routes': './apps/remote-dashboard/src/app/remote-entry/entry.routes.ts',
   },
 
   shared: fromPackageJson({
@@ -513,12 +504,7 @@ export default withNativeFederation({
     strictVersion: true,
     requiredVersion: 'auto',
   })
-    .skip([
-      'rxjs/ajax',
-      'rxjs/fetch',
-      'rxjs/testing',
-      'rxjs/webSocket',
-    ])
+    .skip(['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'])
     .patch(['@angular/*'], {
       includeSecondaries: {
         keepAll: true,
@@ -528,9 +514,7 @@ export default withNativeFederation({
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only([
-    '@client-portal/shared/demo-contracts',
-  ]),
+  }).only(['@client-portal/shared/demo-contracts']),
 });
 ```
 
@@ -555,8 +539,7 @@ export default withNativeFederation({
   name: 'remote-reports',
 
   exposes: {
-    './Routes':
-      './apps/remote-reports/src/app/remote-entry/entry.routes.ts',
+    './Routes': './apps/remote-reports/src/app/remote-entry/entry.routes.ts',
   },
 
   shared: fromPackageJson({
@@ -564,12 +547,7 @@ export default withNativeFederation({
     strictVersion: true,
     requiredVersion: 'auto',
   })
-    .skip([
-      'rxjs/ajax',
-      'rxjs/fetch',
-      'rxjs/testing',
-      'rxjs/webSocket',
-    ])
+    .skip(['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'])
     .patch(['@angular/*'], {
       includeSecondaries: {
         keepAll: true,
@@ -579,9 +557,7 @@ export default withNativeFederation({
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only([
-    '@client-portal/shared/demo-contracts',
-  ]),
+  }).only(['@client-portal/shared/demo-contracts']),
 });
 ```
 
@@ -826,10 +802,7 @@ apps/shell/src/bootstrap.ts
 Replace the Shell's generated `main.ts` with:
 
 ```typescript
-import {
-  initFederation,
-  type NativeFederationResult,
-} from '@angular-architects/native-federation';
+import { initFederation, type NativeFederationResult } from '@angular-architects/native-federation';
 
 initFederation('federation.manifest.json', {
   hostRemoteEntry: {
@@ -865,8 +838,7 @@ import { type NativeFederationResult } from '@angular-architects/native-federati
 import { App } from './app/app';
 import { appConfig } from './app/app.config';
 
-export const bootstrap = (nf: NativeFederationResult) =>
-  bootstrapApplication(App, appConfig(nf));
+export const bootstrap = (nf: NativeFederationResult) => bootstrapApplication(App, appConfig(nf));
 ```
 
 If the generated root component is named `AppComponent` or has a different filename, use its actual generated name.
@@ -884,12 +856,8 @@ import { type NativeFederationResult } from '@angular-architects/native-federati
 
 import { appRoutes } from './app.routes';
 
-export const appConfig = (
-  nf: NativeFederationResult,
-): ApplicationConfig => ({
-  providers: [
-    provideRouter(appRoutes(nf)),
-  ],
+export const appConfig = (nf: NativeFederationResult): ApplicationConfig => ({
+  providers: [provideRouter(appRoutes(nf))],
 });
 ```
 
@@ -1017,7 +985,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 And declares them in its component metadata:
 
 ```typescript
-imports: [RouterLink, RouterOutlet]
+imports: [RouterLink, RouterOutlet];
 ```
 
 The Shell owns navigation and layout.
@@ -1071,7 +1039,7 @@ remote-reports
 The exposed key must match the key used by the Shell:
 
 ```typescript
-loadRemoteModule('remote-dashboard', './Routes')
+loadRemoteModule('remote-dashboard', './Routes');
 ```
 
 The remote name must also match the manifest key.
@@ -1292,12 +1260,8 @@ Example `package.json` configuration:
 ```json
 {
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
-    ],
-    "*.{html,scss,css,json,md,yml,yaml}": [
-      "prettier --write"
-    ]
+    "*.{ts,tsx,js,jsx}": ["eslint --fix"],
+    "*.{html,scss,css,json,md,yml,yaml}": ["prettier --write"]
   }
 }
 ```

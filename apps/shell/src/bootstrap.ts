@@ -4,5 +4,4 @@ import { type NativeFederationResult } from '@angular-architects/native-federati
 import { App } from './app/app';
 import { appConfig } from './app/app.config';
 
-export const bootstrap = (nf: NativeFederationResult) =>
-  bootstrapApplication(App, appConfig(nf));
+export const bootstrap = (nf: NativeFederationResult) => bootstrapApplication(App, appConfig(nf));

@@ -1,4 +1,4 @@
 {
-	"dashboard": "http://localhost:4201/remoteEntry.json",
-	"reports": "http://localhost:4202/remoteEntry.json"
+  "dashboard": "http://localhost:4201/remoteEntry.json",
+  "reports": "http://localhost:4202/remoteEntry.json"
 }
