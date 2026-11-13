@@ -6,11 +6,11 @@ A practical guide for bootstrapping a production-oriented Angular monorepo with 
 
 **Target architecture**
 
-| Application        | Role                     | Local port |
-| ------------------ | ------------------------ | ---------: |
-| `shell`            | Host / Application Shell |       4200 |
-| `remote-dashboard` | Dashboard Micro Frontend |       4201 |
-| `remote-reports`   | Reports Micro Frontend   |       4202 |
+| Application | Role                     | Local port |
+| ----------- | ------------------------ | ---------: |
+| `shell`     | Host / Application Shell |       4200 |
+| `dashboard` | Dashboard Micro Frontend |       4201 |
+| `reports`   | Reports Micro Frontend   |       4202 |
 
 **Technology stack**
 
@@ -139,13 +139,13 @@ The workspace initially contains the Shell application.
 Generate the Dashboard remote:
 
 ```bash
-pnpm nx g @nx/angular:application apps/remote-dashboard
+pnpm nx g @nx/angular:application apps/dashboard
 ```
 
 Generate the Reports remote:
 
 ```bash
-pnpm nx g @nx/angular:application apps/remote-reports
+pnpm nx g @nx/angular:application apps/reports
 ```
 
 Use the generated Angular application defaults and keep both applications standalone.
@@ -161,8 +161,8 @@ Expected project structure:
 ```text
 apps/
 ├── shell/
-├── remote-dashboard/
-└── remote-reports/
+├── dashboard/
+└── reports/
 ```
 
 Check that each application has its own:
@@ -178,8 +178,8 @@ Verify that the applications build independently:
 
 ```bash
 pnpm nx build shell
-pnpm nx build remote-dashboard
-pnpm nx build remote-reports
+pnpm nx build dashboard
+pnpm nx build reports
 ```
 
 At this stage, all three applications are ordinary Angular applications.
@@ -279,7 +279,7 @@ Initialize the Dashboard remote:
 
 ```bash
 pnpm nx g @angular-architects/native-federation:init \
-  --project=remote-dashboard \
+  --project=dashboard \
   --port=4201 \
   --type=remote
 ```
@@ -288,7 +288,7 @@ Initialize the Reports remote:
 
 ```bash
 pnpm nx g @angular-architects/native-federation:init \
-  --project=remote-reports \
+  --project=reports \
   --port=4202 \
   --type=remote
 ```
@@ -308,14 +308,14 @@ Inspect the generated configuration.
 The important target structure should resemble:
 
 ```text
-remote-dashboard:
+dashboard:
   build           -> Native Federation builder
   serve           -> Native Federation builder
   esbuild         -> Angular Application Builder
   serve-original  -> Angular dev-server
 ```
 
-The same applies to `remote-reports`.
+The same applies to `reports`.
 
 **Important:** Do not manually recreate these targets. Let the official schematic generate them.
 
@@ -346,8 +346,8 @@ Replace its contents with:
 
 ```json
 {
-  "remote-dashboard": "http://localhost:4201/remoteEntry.json",
-  "remote-reports": "http://localhost:4202/remoteEntry.json"
+  "dashboard": "http://localhost:4201/remoteEntry.json",
+  "reports": "http://localhost:4202/remoteEntry.json"
 }
 ```
 
@@ -482,7 +482,7 @@ It consumes the routes exposed by the remote applications.
 File:
 
 ```text
-apps/remote-dashboard/federation.config.mjs
+apps/dashboard/federation.config.mjs
 ```
 
 ```javascript
@@ -493,10 +493,10 @@ import {
 } from '@angular-architects/native-federation/config';
 
 export default withNativeFederation({
-  name: 'remote-dashboard',
+  name: 'dashboard',
 
   exposes: {
-    './Routes': './apps/remote-dashboard/src/app/remote-entry/entry.routes.ts',
+    './Routes': './apps/dashboard/src/app/remote-entry/entry.routes.ts',
   },
 
   shared: fromPackageJson({
@@ -523,7 +523,7 @@ export default withNativeFederation({
 File:
 
 ```text
-apps/remote-reports/federation.config.mjs
+apps/reports/federation.config.mjs
 ```
 
 Use the same shared dependency configuration, but change the remote name and exposed route:
@@ -536,10 +536,10 @@ import {
 } from '@angular-architects/native-federation/config';
 
 export default withNativeFederation({
-  name: 'remote-reports',
+  name: 'reports',
 
   exposes: {
-    './Routes': './apps/remote-reports/src/app/remote-entry/entry.routes.ts',
+    './Routes': './apps/reports/src/app/remote-entry/entry.routes.ts',
   },
 
   shared: fromPackageJson({
@@ -578,7 +578,7 @@ export default withNativeFederation({
 Create the following structure:
 
 ```text
-apps/remote-dashboard/src/app/
+apps/dashboard/src/app/
 ├── remote-entry/
 │   └── entry.routes.ts
 ├── features/
@@ -592,14 +592,14 @@ apps/remote-dashboard/src/app/
 
 File:
 
-`apps/remote-dashboard/src/app/features/dashboard/dashboard-page.ts`
+`apps/dashboard/src/app/features/dashboard/dashboard-page.ts`
 
 ```typescript
 import { Component } from '@angular/core';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'remote-dashboard-page',
+  selector: 'app-dashboard-page',
   standalone: true,
   template: `
     <section>
@@ -637,7 +637,7 @@ export class DashboardPage {
 
 File:
 
-`apps/remote-dashboard/src/app/remote-entry/entry.routes.ts`
+`apps/dashboard/src/app/remote-entry/entry.routes.ts`
 
 ```typescript
 import { Routes } from '@angular/router';
@@ -655,7 +655,7 @@ export const REMOTE_ROUTES: Routes = [
 
 File:
 
-`apps/remote-dashboard/src/app/app.routes.ts`
+`apps/dashboard/src/app/app.routes.ts`
 
 ```typescript
 import { Routes } from '@angular/router';
@@ -675,7 +675,7 @@ Ensure its root application component contains a router outlet.
 Create:
 
 ```text
-apps/remote-reports/src/app/
+apps/reports/src/app/
 ├── remote-entry/
 │   └── entry.routes.ts
 ├── features/
@@ -689,14 +689,14 @@ apps/remote-reports/src/app/
 
 File:
 
-`apps/remote-reports/src/app/features/reports/reports-page.ts`
+`apps/reports/src/app/features/reports/reports-page.ts`
 
 ```typescript
 import { Component } from '@angular/core';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'remote-reports-page',
+  selector: 'app-remote-reports-page',
   standalone: true,
   template: `
     <section>
@@ -747,7 +747,7 @@ export class ReportsPage {
 
 File:
 
-`apps/remote-reports/src/app/remote-entry/entry.routes.ts`
+`apps/reports/src/app/remote-entry/entry.routes.ts`
 
 ```typescript
 import { Routes } from '@angular/router';
@@ -765,7 +765,7 @@ export const REMOTE_ROUTES: Routes = [
 
 File:
 
-`apps/remote-reports/src/app/app.routes.ts`
+`apps/reports/src/app/app.routes.ts`
 
 ```typescript
 import { Routes } from '@angular/router';
@@ -908,14 +908,14 @@ export const appRoutes = (nf: NativeFederationResult): Routes => {
   return [
     {
       path: '',
-      redirectTo: 'dashboard',
+      component: HomePage,
       pathMatch: 'full',
     },
     {
       path: 'dashboard',
       loadChildren: () =>
         dashboardLoader
-          .loadRemoteModule('remote-dashboard', './Routes')
+          .loadRemoteModule('dashboard', './Routes')
           .then((remote) => remote.REMOTE_ROUTES)
           .catch((error) => {
             console.error('Dashboard remote failed to load:', error);
@@ -932,7 +932,7 @@ export const appRoutes = (nf: NativeFederationResult): Routes => {
       path: 'reports',
       loadChildren: () =>
         reportsLoader
-          .loadRemoteModule('remote-reports', './Routes')
+          .loadRemoteModule('reports', './Routes')
           .then((remote) => remote.REMOTE_ROUTES)
           .catch((error) => {
             console.error('Reports remote failed to load:', error);
@@ -1006,8 +1006,8 @@ Expected contents:
 
 ```json
 {
-  "remote-dashboard": "http://localhost:4201/remoteEntry.json",
-  "remote-reports": "http://localhost:4202/remoteEntry.json"
+  "dashboard": "http://localhost:4201/remoteEntry.json",
+  "reports": "http://localhost:4202/remoteEntry.json"
 }
 ```
 
@@ -1023,7 +1023,7 @@ Verify that:
 Dashboard:
 
 ```text
-remote-dashboard
+dashboard
   └── ./Routes
       └── entry.routes.ts
 ```
@@ -1031,7 +1031,7 @@ remote-dashboard
 Reports:
 
 ```text
-remote-reports
+reports
   └── ./Routes
       └── entry.routes.ts
 ```
@@ -1039,7 +1039,7 @@ remote-reports
 The exposed key must match the key used by the Shell:
 
 ```typescript
-loadRemoteModule('remote-dashboard', './Routes');
+loadRemoteModule('dashboard', './Routes');
 ```
 
 The remote name must also match the manifest key.
@@ -1062,18 +1062,24 @@ Verify:
 
 ## 24. Start All Applications
 
-Open three separate terminals.
+You can start all three applications simultaneously using the parallel workspace task:
+
+```bash
+pnpm start:all
+```
+
+Alternatively, open three separate terminals:
 
 **Terminal 1 — Dashboard:**
 
 ```bash
-pnpm nx serve remote-dashboard
+pnpm nx serve dashboard
 ```
 
 **Terminal 2 — Reports:**
 
 ```bash
-pnpm nx serve remote-reports
+pnpm nx serve reports
 ```
 
 **Terminal 3 — Shell:**
@@ -1113,16 +1119,24 @@ This confirms that each remote remains a runnable Angular application in its own
 
 ## 25. Build Applications Independently
 
+Build all applications together:
+
+```bash
+pnpm build:all
+```
+
+Or build each application independently:
+
 Build Dashboard:
 
 ```bash
-pnpm nx build remote-dashboard --configuration=production
+pnpm nx build dashboard --configuration=production
 ```
 
 Build Reports:
 
 ```bash
-pnpm nx build remote-reports --configuration=production
+pnpm nx build reports --configuration=production
 ```
 
 Build Shell:
@@ -1140,11 +1154,11 @@ dist/
 └── apps/
     ├── shell/
     │   └── browser/
-    ├── remote-dashboard/
+    ├── dashboard/
     │   └── browser/
     │       ├── remoteEntry.json
     │       └── ...
-    └── remote-reports/
+    └── reports/
         └── browser/
             ├── remoteEntry.json
             └── ...
@@ -1181,8 +1195,8 @@ The Shell manifest would then contain:
 
 ```json
 {
-  "remote-dashboard": "https://dashboard.example.com/remoteEntry.json",
-  "remote-reports": "https://reports.example.com/remoteEntry.json"
+  "dashboard": "https://dashboard.example.com/remoteEntry.json",
+  "reports": "https://reports.example.com/remoteEntry.json"
 }
 ```
 
@@ -1303,7 +1317,7 @@ client-portal/
 │   │   │   └── bootstrap.ts
 │   │   └── federation.config.mjs
 │   │
-│   ├── remote-dashboard/
+│   ├── dashboard/
 │   │   ├── src/
 │   │   │   ├── app/
 │   │   │   │   ├── features/
@@ -1316,7 +1330,7 @@ client-portal/
 │   │   ├── federation.config.mjs
 │   │   └── tsconfig.federation.json
 │   │
-│   └── remote-reports/
+│   └── reports/
 │       ├── src/
 │       │   ├── app/
 │       │   │   ├── features/
