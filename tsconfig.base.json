@@ -13,8 +13,16 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "strict": false,
-    "paths": {}
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@client-portal/ui": ["./libs/shared/ui/src/index.ts"],
+      "@client-portal/shared/demo-contracts": ["./libs/shared/demo-contracts/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

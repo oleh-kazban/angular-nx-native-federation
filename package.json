@@ -2,7 +2,28 @@
   "name": "@angular-nx-native-federation/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:all": "nx run-many -t serve -p shell dashboard reports --parallel=3",
+    "start:shell": "nx serve shell",
+    "start:dashboard": "nx serve dashboard",
+    "start:reports": "nx serve reports",
+    "build:all": "nx run-many -t build -p shell dashboard reports --parallel=3",
+    "build:dashboard": "nx build dashboard",
+    "build:reports": "nx build reports",
+    "build:shell": "nx build shell",
+    "test:all": "nx run-many -t test",
+    "graph": "nx graph",
+    "lint:all": "nx run-many -t lint",
+    "lint:affected": "nx affected:lint",
+    "format": "nx format:write --all",
+    "format:uncommitted": "nx format:write --uncommitted",
+    "format:check": "nx format:check --all",
+    "build": "nx run-many -t build",
+    "dep-graph": "nx dep-graph",
+    "check:circular": "madge --circular --extensions ts --ts-config tsconfig.base.json apps libs",
+    "check:format": "pnpm format:check && pnpm lint && pnpm test && pnpm check:circular",
+    "prepare": "husky"
+  },
   "private": true,
   "dependencies": {
     "@angular/common": "~22.2.0",
@@ -10,10 +31,13 @@
     "@angular/core": "~22.2.0",
     "@angular/forms": "~22.2.0",
     "@angular/platform-browser": "~22.2.0",
+    "@angular/platform-browser-dynamic": "~22.2.0",
     "@angular/router": "~22.2.0",
-    "rxjs": "~7.8.0"
+    "rxjs": "~7.8.0",
+    "es-module-shims": "^2.8.0"
   },
   "devDependencies": {
+    "@angular-architects/native-federation": "~22.2.5",
     "@angular-devkit/core": "~22.2.0",
     "@angular-devkit/schematics": "~22.2.0",
     "@angular/build": "~22.2.0",
@@ -24,22 +48,43 @@
     "@nx/angular": "24.0.6",
     "@nx/eslint": "24.0.6",
     "@nx/eslint-plugin": "24.0.6",
+    "@nx/jest": "24.0.6",
     "@nx/js": "24.0.6",
     "@nx/web": "24.0.6",
     "@nx/workspace": "24.0.6",
     "@schematics/angular": "~22.2.0",
     "@swc/helpers": "~0.5.18",
+    "@types/jest": "~30.0.0",
+    "@types/node": "^22.0.0",
     "@typescript-eslint/utils": "^8.58.0",
     "angular-eslint": "^22.5.0",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
+    "husky": "^9.1.7",
+    "jest": "~30.3.0",
+    "jest-environment-jsdom": "~30.3.0",
+    "jest-preset-angular": "~17.0.0",
+    "jest-util": "~30.3.0",
     "jsdom": "^27.1.0",
+    "lint-staged": "^17.6.0",
+    "madge": "^8.0.0",
     "nx": "24.0.6",
     "prettier": "~3.6.2",
+    "ts-jest": "^29.4.7",
+    "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.58.0",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "@softarc/native-federation-orchestrator": "^4.10.0"
   },
-  "packageManager": "pnpm@10.30.3"
+  "packageManager": "pnpm@10.30.3",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ],
+    "*.{html,scss,css,json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
 }
