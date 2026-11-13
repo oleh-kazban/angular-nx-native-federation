@@ -232,6 +232,25 @@ pnpm nx build reports --configuration=production
 
 The compiled output is located under `dist/apps/<app-name>/browser`, complete with each remote's `remoteEntry.json`.
 
+### 4. GitHub Pages Production Deployment
+
+To bundle all three applications for production hosting under GitHub Pages (`https://oleh-kazban.github.io/angular-nx-native-federation/`):
+
+```bash
+pnpm build:gh-pages
+```
+
+This automated pipeline:
+
+1. Builds `dashboard` and `reports` remotes with their dedicated subpath base hrefs (`/angular-nx-native-federation/remotes/<remote>/`).
+2. Builds `shell` with the root base href (`/angular-nx-native-federation/`).
+3. Assembles the production artifact tree into `dist/gh-pages/`.
+4. Generates the production `federation.manifest.json` pointing to the deployed remote entries.
+5. Injects `.nojekyll` to prevent GitHub Pages from filtering underscore-prefixed bundles (`_angular_*.js`).
+6. Copies `index.html` to `404.html` for client-side SPA routing on refresh.
+
+Automated continuous deployment is pre-configured via `.github/workflows/deploy.yml` on push to `master`.
+
 ---
 
 ## Code Quality, Verification & DX

@@ -19,6 +19,7 @@
     "format:uncommitted": "nx format:write --uncommitted",
     "format:check": "nx format:check --all",
     "build": "nx run-many -t build",
+    "build:gh-pages": "node tools/scripts/build-gh-pages.mjs",
     "dep-graph": "nx dep-graph",
     "check:circular": "madge --circular --extensions ts --ts-config tsconfig.base.json apps libs",
     "check:format": "pnpm format:check && pnpm lint && pnpm test && pnpm check:circular",

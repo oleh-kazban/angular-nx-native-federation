@@ -1202,6 +1202,39 @@ The Shell manifest would then contain:
 
 This demonstrates independent remote deployment and runtime URL configuration.
 
+### 26.1 Single-Origin / GitHub Pages Subpath Deployment
+
+When deploying all applications to a single origin (such as GitHub Pages or a reverse proxy subpath):
+
+```text
+GitHub Pages Environment
+
+https://oleh-kazban.github.io/angular-nx-native-federation/
+    ├── Shell (Root Base Href)
+    ├── federation.manifest.json
+    ├── .nojekyll
+    ├── 404.html (SPA Fallback)
+    └── remotes/
+        ├── dashboard/
+        │   └── remoteEntry.json
+        └── reports/
+            └── remoteEntry.json
+```
+
+The production manifest maps the remote URLs accordingly:
+
+```json
+{
+  "dashboard": "https://oleh-kazban.github.io/angular-nx-native-federation/remotes/dashboard/remoteEntry.json",
+  "reports": "https://oleh-kazban.github.io/angular-nx-native-federation/remotes/reports/remoteEntry.json"
+}
+```
+
+Critical GitHub Pages deployment invariants:
+
+- `.nojekyll`: Disables Jekyll processing so files starting with underscores (e.g. `_angular_*.js`) are served instead of returning 404.
+- `404.html`: A duplicate of `index.html` allowing Angular's client-side router to handle deep links and browser refreshes on routes like `/dashboard` and `/reports`.
+
 For a real production deployment, also configure:
 
 - CORS for cross-origin remote assets.
