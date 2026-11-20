@@ -249,7 +249,7 @@ This automated pipeline:
 5. Injects `.nojekyll` to prevent GitHub Pages from filtering underscore-prefixed bundles (`_angular_*.js`).
 6. Copies `index.html` to `404.html` for client-side SPA routing on refresh.
 
-Automated continuous deployment is pre-configured via `.github/workflows/deploy.yml` on push to `master`.
+Automated continuous deployment is pre-configured via `.github/workflows/deploy.yml` on push to `master`. A `verify` job (format check, lint, tests, circular-dependency check) runs first and must pass before the `deploy` job publishes to GitHub Pages; pull requests to `master` run only `verify`.
 
 ---
 
