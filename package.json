@@ -80,6 +80,9 @@
     "@softarc/native-federation-orchestrator": "4.10.0"
   },
   "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,cjs,mjs,html,scss,css,json,md,yml,yaml}": [
       "prettier --write"

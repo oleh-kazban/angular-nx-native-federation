@@ -40,7 +40,7 @@ The guide uses the Angular 22+ Native Federation v4 package naming. The federati
 
 Install and verify:
 
-- Node.js LTS compatible with the selected Angular release.
+- Node.js `^22.22.3`, `^24.15.0` or `>=26` (the range Angular 22 supports; `.nvmrc` pins `24`).
 - Git.
 - pnpm.
 - Visual Studio Code.

@@ -173,7 +173,7 @@ Remote failures do not cascade to crash the Shell. If a remote service goes down
 
 ### Prerequisites
 
-- **Node.js**: `v20.x` or `v22.x` (LTS)
+- **Node.js**: `^22.22.3`, `^24.15.0` or `>=26` (required by Angular 22; `.nvmrc` pins `24`)
 - **pnpm**: `v10.x` (`npm install --global pnpm`)
 - **Git**
 
