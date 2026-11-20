@@ -14,7 +14,7 @@
     "test:all": "nx run-many -t test",
     "graph": "nx graph",
     "lint:all": "nx run-many -t lint",
-    "lint:affected": "nx affected:lint",
+    "lint:affected": "nx affected -t lint",
     "format": "nx format:write --all",
     "format:uncommitted": "nx format:write --uncommitted",
     "format:check": "nx format:check --all",
@@ -81,10 +81,7 @@
   },
   "packageManager": "pnpm@10.30.3",
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
-    ],
-    "*.{html,scss,css,json,md,yml,yaml}": [
+    "*.{ts,tsx,js,jsx,cjs,mjs,html,scss,css,json,md,yml,yaml}": [
       "prettier --write"
     ]
   }

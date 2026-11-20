@@ -1307,8 +1307,7 @@ Example `package.json` configuration:
 ```json
 {
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": ["eslint --fix"],
-    "*.{html,scss,css,json,md,yml,yaml}": ["prettier --write"]
+    "*.{ts,tsx,js,jsx,cjs,mjs,html,scss,css,json,md,yml,yaml}": ["prettier --write"]
   }
 }
 ```
@@ -1316,8 +1315,10 @@ Example `package.json` configuration:
 Example `.husky/pre-commit`:
 
 ```bash
-pnpm exec lint-staged
+pnpm exec lint-staged && pnpm lint:affected
 ```
+
+lint-staged formats only the staged files with Prettier and re-stages them. Linting runs through `nx affected -t lint` rather than `eslint --fix` in lint-staged: ESLint invoked from the workspace root only sees the root `eslint.config.mjs`, so it would skip each project's Angular rules.
 
 Run a test commit:
 

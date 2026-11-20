@@ -1,1 +1,1 @@
-pnpm format && pnpm lint:affected
+pnpm exec lint-staged && pnpm lint:affected
