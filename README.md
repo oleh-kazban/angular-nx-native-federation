@@ -262,7 +262,7 @@ Automated continuous deployment is pre-configured via `.github/workflows/deploy.
 | **Format Check**      | `pnpm format:check`   | Verify codebase formatting with Prettier                               |
 | **Format Write**      | `pnpm format`         | Auto-format uncommitted or all files with Prettier                     |
 | **Circular Check**    | `pnpm check:circular` | Audit dependency tree with **Madge** to prevent architectural cycles   |
-| **Full Health Check** | `pnpm check:format`   | Comprehensive check: Format + Lint + Tests + Circular Dependencies     |
+| **Full Health Check** | `pnpm check:all`      | Comprehensive check: Format + Lint + Tests + Circular Dependencies     |
 | **Project Graph**     | `pnpm graph`          | Visualize Nx dependency graph and project boundaries                   |
 
 ---
