@@ -63,7 +63,17 @@ describe('shell home route', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
-        provideRouter(appRoutes({ as: () => ({ loadRemoteModule, load: loadRemoteModule }) })),
+        provideRouter(
+          appRoutes(
+            {
+              as: () => ({ loadRemoteModule, load: loadRemoteModule }),
+              initRemoteEntry: async () => {
+                throw new Error('Remote should not be initialized on the home page');
+              },
+            },
+            {},
+          ),
+        ),
       ],
     }).compileComponents();
 
@@ -79,12 +89,17 @@ describe('shell home route', () => {
 });
 
 describe('shell remote failure', () => {
-  it('shows the fallback when a remote fails and retries it on the next navigation', async () => {
-    let calls = 0;
+  it('registers a remote lazily, shows the fallback while it is down and loads it once it is back', async () => {
+    // Loading a remote fails until initRemoteEntry has registered it, and
+    // registering an unreachable remote resolves without registering it.
+    let remoteUp = false;
+    let registered = false;
+    const initRemoteEntry = vi.fn(async () => {
+      registered = remoteUp;
+    });
     const loadRemoteModule = async () => {
-      calls++;
-      if (calls === 1) {
-        throw new Error('remote offline');
+      if (!registered) {
+        throw new Error("Remote 'dashboard' is not initialized.");
       }
       return { REMOTE_ROUTES: [{ path: '', component: DashboardStub }] as Routes };
     };
@@ -94,7 +109,10 @@ describe('shell remote failure', () => {
       imports: [App],
       providers: [
         provideRouter(
-          appRoutes({ as: () => ({ loadRemoteModule, load: loadRemoteModule }) as never }),
+          appRoutes(
+            { as: () => ({ loadRemoteModule, load: loadRemoteModule }), initRemoteEntry } as never,
+            { dashboard: 'http://remote.test/remoteEntry.json' },
+          ),
           withNavigationErrorHandler(redirectToRemoteUnavailable),
         ),
       ],
@@ -104,14 +122,22 @@ describe('shell remote failure', () => {
     const router = TestBed.inject(Router);
     const compiled = fixture.nativeElement as HTMLElement;
 
+    await router.navigateByUrl('/');
+    await fixture.whenStable();
+    expect(initRemoteEntry).not.toHaveBeenCalled();
+
     await router.navigateByUrl('/dashboard');
     await fixture.whenStable();
     expect(router.url).toBe('/remote-unavailable?from=%2Fdashboard');
     expect(compiled.querySelector('h1')?.textContent).toContain('Remote application unavailable');
+    expect(initRemoteEntry).toHaveBeenCalledWith(
+      'http://remote.test/remoteEntry.json',
+      'dashboard',
+    );
 
+    remoteUp = true;
     compiled.querySelector<HTMLButtonElement>('main button')?.click();
     await fixture.whenStable();
-    expect(calls).toBe(2);
     expect(router.url).toBe('/dashboard');
     expect(compiled.querySelector('h1')?.textContent).toContain('Dashboard feature');
   });

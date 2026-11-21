@@ -2,3 +2,23 @@ body {
   margin: 0;
   background: #fff;
 }
+
+// Rendered by main.ts when the shell cannot start (no Angular available).
+.startup-error {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  box-sizing: border-box;
+  color: #17233b;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+
+  &__title {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+
+  &__message {
+    color: #64748b;
+    line-height: 1.6;
+  }
+}

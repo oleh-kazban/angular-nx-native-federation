@@ -1,12 +1,18 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter, withNavigationErrorHandler } from '@angular/router';
-import { type NativeFederationResult } from '@angular-architects/native-federation';
+import {
+  type FederationManifest,
+  type NativeFederationResult,
+} from '@angular-architects/native-federation';
 
 import { appRoutes } from './app.routes';
 import { redirectToRemoteUnavailable } from './remote-navigation-error';
 
-export const appConfig = (nf: NativeFederationResult): ApplicationConfig => ({
+export const appConfig = (
+  nf: NativeFederationResult,
+  manifest: FederationManifest,
+): ApplicationConfig => ({
   providers: [
-    provideRouter(appRoutes(nf), withNavigationErrorHandler(redirectToRemoteUnavailable)),
+    provideRouter(appRoutes(nf, manifest), withNavigationErrorHandler(redirectToRemoteUnavailable)),
   ],
 });
