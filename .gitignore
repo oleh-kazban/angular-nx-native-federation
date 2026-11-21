@@ -54,3 +54,6 @@ audit*.md
 
 .nx/polygraph.ai/tasks/
 .playwright-mcp/
+
+# Agent handoff pipeline working state (see CLAUDE.md)
+.ai/tasks/

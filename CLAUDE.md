@@ -15,8 +15,18 @@ This repository is an enterprise microfrontend reference architecture demonstrat
 1. Never bypass Git hooks (`--no-verify` is strictly forbidden). Pre-commit enforces `lint-staged` and `pnpm lint:affected`.
 2. Always use `pnpm` as the package manager (never `npm` or `yarn`) and execute workspace tasks through Nx (`pnpm nx ...` or root `package.json` scripts).
 3. Before finishing any architectural or module change, verify zero circular dependencies with `pnpm check:circular` (or run the full verification gate `pnpm check:all`).
-4. All multi-step features must follow the agent handoff pipeline in `.ai/tasks/<task-id>/`.
+4. All multi-step features must follow the agent handoff pipeline in `.ai/tasks/<task-id>/` (see [Agent Handoff Pipeline](#agent-handoff-pipeline)).
 5. Preserve Native Federation invariants: keep `@angular/*` configured as strict singletons, share internal workspace contracts through `sharedMappings` (e.g., `@client-portal/shared/demo-contracts`), keep every remote runnable standalone, and preserve fault-boundary fallbacks in `shell` for remote loading failures.
+
+## Agent Handoff Pipeline
+
+Every multi-step feature or fix gets a folder `.ai/tasks/<task-id>/`, where `<task-id>` is a short kebab-case slug (for example `route-titles`). The folder is local working state (git-ignored) that lets any agent or a later session pick the task up. It holds three files:
+
+- `plan.md`: the goal, acceptance criteria, the steps, and the files or projects each step touches. Written before any code is changed; updated when the plan changes.
+- `progress.md`: one entry per step with its status (`todo`, `in progress`, `awaiting approval`, `done`), what changed, how it was verified (commands and their results) and the commit hash.
+- `handoff.md`: the current state for whoever continues: what is done, what comes next, open questions and anything not yet verified. Rewritten, not appended, whenever work stops.
+
+Read all three before resuming a task. Update `progress.md` after every step and `handoff.md` before stopping. A step is `done` only after its verification passed and, when the user reviews changes, after they approved the commit.
 
 ---
 
