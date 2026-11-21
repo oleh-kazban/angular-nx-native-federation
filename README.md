@@ -320,7 +320,7 @@ If you are reconstructing this architecture from scratch or adopting it in an ex
 8. **Expose & Route**: Remotes export `./Routes`; Shell wires dynamic `loadRemoteModule` with resilience boundaries.
 
 > [!NOTE]
-> For the exhaustive, line-by-line configuration guide covering every file modification, build target mutation, and production hosting concern, see [setup-guide.md](setup-guide.md).
+> For the exhaustive, line-by-line configuration guide covering every file modification, build target mutation, and production hosting concern, see [SETUP-GUIDE.md](SETUP-GUIDE.md).
 
 ---
 
@@ -330,4 +330,4 @@ If you are reconstructing this architecture from scratch or adopting it in an ex
 - [Angular Builders & esbuild](https://angular.dev/tools/cli/build-system)
 - [Native Federation Documentation](https://native-federation.com/)
 - [Nx Module Federation Migration Guide](https://nx.dev/docs/kb/migrate-angular-module-federation)
-- [Architecture & Setup Deep Dive](setup-guide.md)
+- [Architecture & Setup Deep Dive](SETUP-GUIDE.md)
