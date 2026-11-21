@@ -1,499 +1,467 @@
-# Angular + Nx + Native Federation
+# Setup Guide
 
-## End-to-End Monorepo Setup Guide
+This guide rebuilds this repository in a new, empty folder: an Nx monorepo with an Angular shell (`:4200`) that loads two Angular remotes (`dashboard` on `:4201`, `reports` on `:4202`) at runtime through Native Federation, plus two shared libraries and the quality tooling.
 
-A practical guide for bootstrapping a production-oriented Angular monorepo with one Shell application and two independently built Micro Frontends.
+Every step says **what** to run, **where** and **why**. Commands and generated output were checked against Nx 24.0.6, Angular 22.2 and `@angular-architects/native-federation` 22.2.5 on Windows (Git Bash) and apply unchanged on macOS and Linux.
 
-**Target architecture**
+For background on how the pieces work at runtime, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
-| Application | Role                     | Local port |
-| ----------- | ------------------------ | ---------: |
-| `shell`     | Host / Application Shell |       4200 |
-| `dashboard` | Dashboard Micro Frontend |       4201 |
-| `reports`   | Reports Micro Frontend   |       4202 |
+## Contents
 
-**Technology stack**
+1. [Prerequisites](#1-prerequisites)
+2. [Create the workspace](#2-create-the-workspace)
+3. [Generate the applications](#3-generate-the-applications)
+4. [Generate the shared libraries](#4-generate-the-shared-libraries)
+5. [Align the generated configuration](#5-align-the-generated-configuration)
+6. [Add Native Federation](#6-add-native-federation)
+7. [Configure federation](#7-configure-federation)
+8. [Implement the remotes](#8-implement-the-remotes)
+9. [Implement the shell](#9-implement-the-shell)
+10. [Module boundaries](#10-module-boundaries)
+11. [Quality tooling](#11-quality-tooling)
+12. [Scripts](#12-scripts)
+13. [Run and verify](#13-run-and-verify)
+14. [Deploy to GitHub Pages](#14-deploy-to-github-pages)
+15. [Final layout](#15-final-layout)
 
-| Area                | Technology                              |
-| ------------------- | --------------------------------------- |
-| Framework           | Angular                                 |
-| Language            | TypeScript                              |
-| Monorepo            | Nx 24                                   |
-| Package manager     | pnpm                                    |
-| Bundler             | esbuild                                 |
-| Dev server          | Vite through Angular tooling            |
-| Federation          | `@angular-architects/native-federation` |
-| Runtime             | Native Federation Orchestrator          |
-| Linting             | ESLint                                  |
-| Formatting          | Prettier                                |
-| Dependency analysis | Madge                                   |
-| Git hooks           | Husky + lint-staged                     |
-| Unit testing        | Jest (`jest-preset-angular`)            |
+## Versions
 
-The guide uses the Angular 22+ Native Federation v4 package naming. The federation adapter must match the installed Angular version.
+The exact versions live in [`package.json`](package.json). The ones that must match each other:
 
----
-
-# Part 1. Workspace Foundation
+| Package                                 | Version                            | Constraint                                                |
+| --------------------------------------- | ---------------------------------- | --------------------------------------------------------- |
+| Node.js                                 | `^22.22.3 \|\| ^24.15.0 \|\| >=26` | Required by Angular 22; `.nvmrc` pins `24`                |
+| pnpm                                    | `10.30.3`                          | Pinned through `packageManager`                           |
+| `nx`, `@nx/*`                           | `24.0.6`                           | All Nx packages on one version                            |
+| `@angular/*`                            | `22.2.0`                           | All Angular packages on one version                       |
+| `@angular-architects/native-federation` | `22.2.5`                           | Major and minor follow Angular (`22.2.x` ↔ Angular 22.2) |
+| `typescript`                            | `6.0.3`                            | Within Angular 22's supported range                       |
 
 ## 1. Prerequisites
 
-Install and verify:
-
-- Node.js `^22.22.3`, `^24.15.0` or `>=26` (the range Angular 22 supports; `.nvmrc` pins `24`).
-- Git.
-- pnpm.
-- Visual Studio Code.
+Install Node.js (a version from the table), Git and pnpm:
 
 ```bash
 node --version
-npm --version
 git --version
+npm install --global pnpm
 pnpm --version
 ```
 
-Install pnpm if necessary:
+Any recent global pnpm works: the `packageManager` field you add in step 2 makes pnpm switch to `10.30.3` inside the project automatically.
+
+## 2. Create the workspace
+
+### Why not `create-nx-workspace`
+
+In Nx 24, `create-nx-workspace --preset=angular-monorepo` downloads the `nrwl/angular-template` example and ignores the app name, bundler, test runner and other flags; you get a `shop` app, an `api` app, Vitest, Playwright and SSR. `--preset=apps` downloads an empty template that uses pnpm workspaces and TypeScript project references instead of the classic `tsconfig.base.json` path aliases this repo relies on (Native Federation's `sharedMappings` reads those aliases).
+
+Starting from a bare `package.json` and running the Nx generators with explicit flags is deterministic and produces exactly this repo's layout.
+
+### Create the folder
 
 ```bash
-npm install --global pnpm
+mkdir angular-nx-native-federation
+cd angular-nx-native-federation
+git init -b master
 ```
 
-## 2. Create the Nx Workspace
+The repo's default branch is `master`; Nx's `defaultBase` and the CI workflow refer to it.
 
-Create an integrated Angular workspace:
-
-```bash
-pnpm dlx create-nx-workspace@latest client-portal
-```
-
-Select the following options in the interactive setup:
-
-| Setting          | Value                         |
-| ---------------- | ----------------------------- |
-| Stack            | Angular                       |
-| Workspace type   | Integrated Monorepo           |
-| Application name | shell                         |
-| Bundler          | esbuild                       |
-| Stylesheet       | SCSS                          |
-| Linter           | ESLint                        |
-| Unit test runner | Jest                          |
-| Package manager  | pnpm                          |
-| SSR              | Disabled for the initial demo |
-
-Enter the workspace:
-
-```bash
-cd client-portal
-```
-
-Verify:
-
-```bash
-pnpm nx --version
-pnpm nx show projects
-pnpm nx graph
-```
-
-Start the initial application:
-
-```bash
-pnpm nx serve shell
-```
-
-## 3. Configure pnpm
-
-Verify the root `package.json` contains the package manager declaration:
+Create `package.json`:
 
 ```json
 {
-  "packageManager": "pnpm@<installed-version>"
+  "name": "@client-portal/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  }
 }
 ```
 
-`pnpm-workspace.yaml` holds pnpm settings only. This is an integrated Nx workspace: one root `package.json` and one lockfile, and apps and libraries have no `package.json` of their own, so it needs no `packages` list. Declare which dependency install scripts may run (pnpm 10 skips them by default):
+- `@client-portal/source`: the `@client-portal` scope matches the library import paths (`@client-portal/shared/ui`).
+- `packageManager`: pins pnpm for everyone, including CI (`pnpm/action-setup` reads it).
+- `engines`: the Node range Angular 22 supports.
+
+Create `.nvmrc` with the single line `24`. CI reads it (`node-version-file: .nvmrc`), and `nvm use` picks it up locally.
+
+Create `pnpm-workspace.yaml`. It holds pnpm settings only: this is an integrated workspace with one root `package.json` and one lockfile, so there is no `packages` list.
 
 ```yaml
 autoInstallPeers: true
+# Allowed: esbuild's install script checks it has the right platform binary.
 onlyBuiltDependencies:
   - esbuild
   - nx
+# Ignored on purpose: these only compile from source when their bundled prebuilt binary is missing.
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - lmdb
   - msgpackr-extract
 ```
 
-Install dependencies:
+pnpm 10 skips dependency install scripts unless they are listed here.
 
-```bash
-pnpm install
+Create `nx.json` with only the schema; the generators fill it in, and step 5 gives the final version:
+
+```json
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json"
+}
 ```
 
-Commit `pnpm-lock.yaml`.
+Create `.gitignore`:
 
-Use pnpm exclusively throughout the workspace.
+```gitignore
+# compiled output
+dist
+tmp
+out-tsc
 
----
+# dependencies
+node_modules
 
-# Part 2. Create the Applications
+# caches
+/coverage
+.angular
+.nx/cache
+.nx/workspace-data
+.nx/migrate-runs
 
-## 4. Generate Two Remote Applications
-
-The workspace initially contains the Shell application.
-
-Generate the Dashboard remote:
-
-```bash
-pnpm nx g @nx/angular:application apps/dashboard
+# editors and OS
+/.idea
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
 ```
 
-Generate the Reports remote:
+### Install Nx
 
 ```bash
-pnpm nx g @nx/angular:application apps/reports
+pnpm add -D nx@24.0.6 @nx/angular@24.0.6
 ```
 
-Use the generated Angular application defaults and keep both applications standalone.
+`@nx/angular` provides the Angular generators and pulls in `@nx/js`, `@nx/eslint`, `@nx/jest` and `@nx/web` when the first generator needs them.
 
-Verify the projects:
+> [!TIP]
+> If `pnpm nx g ...` writes all its files but the process never exits (seen on Windows), the Nx daemon is holding it open. Stop it with `pnpm nx daemon --stop` and run generators with the daemon off: `NX_DAEMON=false pnpm nx g ...` (in PowerShell: `$env:NX_DAEMON='false'`).
+
+## 3. Generate the applications
+
+Run from the workspace root:
+
+```bash
+pnpm nx g @nx/angular:application apps/shell \
+  --prefix=shl --port=4200 --tags=type:app,scope:shell \
+  --style=scss --bundler=esbuild --unitTestRunner=jest --e2eTestRunner=none \
+  --linter=eslint --ssr=false --zoneless=true --no-interactive
+
+pnpm nx g @nx/angular:application apps/dashboard \
+  --prefix=dsh --port=4201 --tags=type:app,scope:dashboard \
+  --style=scss --bundler=esbuild --unitTestRunner=jest --e2eTestRunner=none \
+  --linter=eslint --ssr=false --zoneless=true --no-interactive
+
+pnpm nx g @nx/angular:application apps/reports \
+  --prefix=rpt --port=4202 --tags=type:app,scope:reports \
+  --style=scss --bundler=esbuild --unitTestRunner=jest --e2eTestRunner=none \
+  --linter=eslint --ssr=false --zoneless=true --no-interactive
+```
+
+| Flag                    | Why                                                                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `apps/<name>`           | Project directory; the project name is the last segment.                                                                     |
+| `--prefix`              | Component selector prefix per app (`shl-`, `dsh-`, `rpt-`), so selectors never collide once remotes render inside the shell. |
+| `--port`                | Dev server port. Native Federation's `init` later reads it to fill in the shell's manifest.                                  |
+| `--tags`                | `type:*` and `scope:*` tags for the module boundary rules in [step 10](#10-module-boundaries).                               |
+| `--bundler=esbuild`     | Angular's application builder (esbuild + Vite). Native Federation wraps this builder.                                        |
+| `--unitTestRunner=jest` | Jest with `jest-preset-angular`. The Nx 24 default for Angular is Vitest.                                                    |
+| `--e2eTestRunner=none`  | No e2e project.                                                                                                              |
+| `--ssr=false`           | Client-side rendering only. Remotes load at runtime and are not prerendered.                                                 |
+| `--zoneless=true`       | No `zone.js`; change detection runs on signals.                                                                              |
+
+The first generator also creates the root `tsconfig.base.json`, `eslint.config.mjs`, `jest.config.ts`, `jest.preset.js`, `.prettierrc`, `.prettierignore`, adds the ESLint and Jest plugins to `nx.json`, and installs Angular, ESLint, Jest and Prettier.
+
+Check:
 
 ```bash
 pnpm nx show projects
 ```
 
-Expected project structure:
-
-```text
-apps/
-├── shell/
-├── dashboard/
-└── reports/
-```
-
-Check that each application has its own:
-
-- Angular bootstrap.
-- Application configuration.
-- Routing configuration.
-- Build target.
-- Serve target.
-- Unit test configuration.
-
-Verify that the applications build independently:
+## 4. Generate the shared libraries
 
 ```bash
-pnpm nx build shell
-pnpm nx build dashboard
-pnpm nx build reports
+pnpm nx g @nx/angular:library libs/shared/demo-contracts \
+  --importPath=@client-portal/shared/demo-contracts --tags=type:util,scope:shared \
+  --unitTestRunner=jest --linter=eslint --no-interactive
+
+pnpm nx g @nx/angular:library libs/shared/ui \
+  --importPath=@client-portal/shared/ui --prefix=ui --style=scss --tags=type:ui,scope:shared \
+  --unitTestRunner=jest --linter=eslint --no-interactive
 ```
 
-At this stage, all three applications are ordinary Angular applications.
+- `--importPath` adds the alias to `tsconfig.base.json` `paths`. Apps import the library through it, and Native Federation's `sharedMappings` shares it at runtime under the same name.
+- `demo-contracts` holds framework-free constants and types (`type:util`). `ui` holds presentational components (`type:ui`).
+- Libraries are not buildable or publishable: apps compile them from source, and federation shares them without a registry.
 
-We will introduce federation in the next steps.
+Each generator adds a sample component. Delete `libs/shared/demo-contracts/src/lib/` and `libs/shared/ui/src/lib/ui/`.
 
----
-
-# Part 3. Shared Workspace Libraries
-
-## 5. Create a Shared Library
-
-To demonstrate sharing between independently built applications, create a small workspace library.
-
-```bash
-pnpm nx g @nx/angular:library libs/shared/demo-contracts --importPath=@client-portal/shared/demo-contracts
-```
-
-Expected location:
-
-```text
-libs/
-└── shared/
-    └── demo-contracts/
-        └── src/
-            └── index.ts
-```
-
-Create a small shared API in `libs/shared/demo-contracts/src/index.ts`:
+`libs/shared/demo-contracts/src/index.ts`:
 
 ```typescript
 export const DEMO_BRAND = 'Client Portal';
 ```
 
-Verify the import path in the root TypeScript configuration.
+The `ui` library provides `Page`, `SectionHeading` and `DemoBadge` (see [its README](libs/shared/ui/README.md)). Copy `libs/shared/ui/src/` from this repository; the components are presentational and their structure does not affect the federation setup. They ship their own styles because a remote's global stylesheet is not loaded when the shell hosts it.
 
-Expected alias:
+## 5. Align the generated configuration
+
+The generators target a generic workspace. These edits bring the result in line with this repo.
+
+### `tsconfig.base.json`
+
+Without a workspace preset, the generated base is loose (`strict: false`, `target: es2015`). Replace it:
 
 ```json
 {
+  "compileOnSave": false,
   "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2022",
+    "module": "esnext",
+    "lib": ["es2022", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@client-portal/shared/demo-contracts": ["libs/shared/demo-contracts/src/index.ts"]
+      "@client-portal/shared/ui": ["./libs/shared/ui/src/index.ts"],
+      "@client-portal/shared/demo-contracts": ["./libs/shared/demo-contracts/src/index.ts"]
     }
+  },
+  "exclude": ["node_modules", "tmp"]
+}
+```
+
+Strict mode and `es2022` now apply everywhere, so remove the options the generator repeated in each project's `tsconfig.json` (`strict`, `noImplicitOverride`, `noPropertyAccessFromIndexSignature`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `target`, `emitDecoratorMetadata`). An app's `tsconfig.json` keeps only:
+
+```json
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "isolatedModules": true,
+    "module": "preserve"
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "include": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.spec.json" }]
+}
+```
+
+### Jest: `.cts` → `.cjs`, spec tsconfig
+
+The generators write `jest.config.cts`. Jest compiles TypeScript configs with ts-node, which fails under TypeScript 6. In every app and library, replace `jest.config.cts` with a plain CommonJS `jest.config.cjs` (adjust `displayName`, the preset path and the coverage path per project):
+
+```javascript
+// apps/dashboard/jest.config.cjs
+module.exports = {
+  displayName: 'dashboard',
+  preset: '../../jest.preset.js',
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  coverageDirectory: '../../coverage/apps/dashboard',
+  transform: {
+    '^.+\\.(ts|mjs|js|html)$': [
+      'jest-preset-angular',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        stringifyContentPathRegex: '\\.(html|svg)$',
+      },
+    ],
+  },
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  snapshotSerializers: [
+    'jest-preset-angular/build/serializers/no-ng-attributes',
+    'jest-preset-angular/build/serializers/ng-snapshot',
+    'jest-preset-angular/build/serializers/html-comment',
+  ],
+};
+```
+
+Libraries live one level deeper: `preset: '../../../jest.preset.js'`, `coverageDirectory: '../../../coverage/libs/shared/<name>'`. `demo-contracts` has no specs yet, so add `passWithNoTests: true` to its config.
+
+In every `tsconfig.spec.json`, the generator sets `moduleResolution: node10` (TypeScript 6 reports it as deprecated, TS5107) and `target: es2016`. Set both to match the base, and drop `jest.config.ts` from `include`:
+
+```json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "module": "commonjs",
+    "target": "es2022",
+    "types": ["jest", "node"],
+    "moduleResolution": "bundler"
+  },
+  "files": ["src/test-setup.ts"],
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
+}
+```
+
+Also remove `jest.config.ts` and `jest.config.cts` from the `exclude` list in each `tsconfig.app.json` / `tsconfig.lib.json`.
+
+### `nx.json`
+
+Replace the generated file:
+
+```json
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "master",
+  "analytics": false,
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/eslint.config.mjs",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.{cjs,mjs,js,cts,mts,ts}",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s"
+    ],
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"]
+  },
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production", "{workspaceRoot}/package.json"],
+      "outputs": ["{workspaceRoot}/dist/apps/{projectName}"]
+    },
+    "@angular/build:application": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    }
+  },
+  "plugins": [
+    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
+    { "plugin": "@nx/jest/plugin", "options": { "targetName": "test" } }
+  ],
+  "generators": {
+    "@nx/angular:application": {
+      "e2eTestRunner": "none",
+      "linter": "eslint",
+      "style": "scss",
+      "unitTestRunner": "jest"
+    },
+    "@nx/angular:library": {
+      "linter": "eslint",
+      "unitTestRunner": "jest"
+    },
+    "@nx/angular:component": {
+      "style": "scss"
+    }
+  },
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "libs"
   }
 }
 ```
 
-Preserve all existing Nx-generated paths.
+- `defaultBase: master`: `nx affected` compares against `master`.
+- `sharedGlobals`: a change to `tsconfig.base.json` invalidates every cached task.
+- `production` input: test files and lint config don't invalidate build caches.
+- `targetDefaults.build`: caches the Native Federation `build` target (added in step 6) and rebuilds when `package.json` changes, because `fromPackageJson` reads it.
+- `generators`: future `nx g` calls default to SCSS, Jest and no e2e.
 
-The library will be imported by both remotes and will also be registered as a shared workspace mapping in Native Federation.
+### Dependencies
 
-This demonstrates the difference between:
-
-- Sharing npm dependencies.
-- Sharing libraries through Nx workspace TypeScript paths.
-
-### 5.1 Shared UI Library
-
-Create a second library for UI components that the remotes share:
+The generators add packages this repo does not use. Remove them, and move ESLint to version 10 (every ESLint 9 release is deprecated). `@nx/eslint-plugin` needs `@eslint/js`, which ESLint 10 no longer bundles:
 
 ```bash
-pnpm nx g @nx/angular:library libs/shared/ui --importPath=@client-portal/shared/ui --style=scss
+pnpm remove @angular/forms @angular/platform-browser-dynamic @swc/helpers ts-node jest-util
+pnpm add -D eslint@10.14.0 @eslint/js@10.0.1
 ```
 
-It holds presentational components (`Page`, `SectionHeading`, `DemoBadge`) used by both remote feature pages; see `libs/shared/ui/README.md`. A remote's global stylesheet is not loaded when the shell hosts it, so shared visuals belong in components with their own styles, not in a shared stylesheet.
+To reproduce the exact versions, copy `dependencies` and `devDependencies` from this repo's `package.json` and run `pnpm install`.
 
----
+### App components
 
-# Part 4. Install Native Federation
+Each generated app contains a demo page (`nx-welcome.ts`). Delete `apps/<app>/src/app/nx-welcome.ts` in all three apps, and `app.scss` in both remotes (they have no root styles).
 
-## 6. Install the Angular Adapter
+## 6. Add Native Federation
 
-First, inspect the installed Angular version:
+Install the adapter that matches the installed Angular version (`pnpm list @angular/core`):
 
 ```bash
-pnpm list @angular/core @angular/cli @nx/angular nx
+pnpm add -D @angular-architects/native-federation@22.2.5
 ```
 
-For Angular 22+, install the matching Native Federation adapter.
+The adapter's major and minor versions follow Angular's: `22.2.x` for Angular 22.2. Angular 20/21 use the separate `@angular-architects/native-federation-v4` package instead.
 
-Example for Angular 22.2.x:
+Initialize the remotes first, then the shell:
 
 ```bash
-pnpm add -D @angular-architects/native-federation@~22.2.5
+pnpm nx g @angular-architects/native-federation:init --project=dashboard --port=4201 --type=remote
+pnpm nx g @angular-architects/native-federation:init --project=reports --port=4202 --type=remote
+pnpm nx g @angular-architects/native-federation:init --project=shell --port=4200 --type=dynamic-host
 ```
 
-For Angular 20/21, use the corresponding `@angular-architects/native-federation-v4` package instead, matching the installed Angular release.
+What `init` changes in each project:
 
-Do not mix adapter package generations or majors.
+1. Creates `federation.config.mjs` and `tsconfig.federation.json`.
+2. Moves the Angular `build` target to `esbuild` and the `serve` target to `serve-original`, and adds new `build` and `serve` targets that run `@angular-architects/native-federation:build` on top of them:
 
-Verify installation:
+   ```text
+   build           → @angular-architects/native-federation:build → esbuild
+   serve           → @angular-architects/native-federation:build → serve-original
+   esbuild         → @angular/build:application
+   serve-original  → @angular/build:dev-server (port 4200/4201/4202)
+   ```
 
-```bash
-pnpm list @angular-architects/native-federation
-```
+3. Adds `es-module-shims` to the `polyfills` of the `esbuild` target and to `dependencies`.
+4. Moves the old `main.ts` to `bootstrap.ts` and writes a new `main.ts` that calls `initFederation` before importing `./bootstrap`.
+5. For `--type=dynamic-host` only: creates `apps/shell/public/federation.manifest.json` with an entry for every other app, using its dev server port:
 
-## 7. Initialize the Remote Applications
+   ```json
+   {
+     "dashboard": "http://localhost:4201/remoteEntry.json",
+     "reports": "http://localhost:4202/remoteEntry.json"
+   }
+   ```
 
-Initialize the Dashboard remote:
+   The keys must equal the remotes' federation names. A dynamic host reads remote URLs from this file at runtime, so another environment needs only a different manifest, not a rebuild.
 
-```bash
-pnpm nx g @angular-architects/native-federation:init \
-  --project=dashboard \
-  --port=4201 \
-  --type=remote
-```
+`init` also adds `@softarc/native-federation-orchestrator` to `devDependencies`. The adapter already depends on it, so remove the duplicate pin: `pnpm remove @softarc/native-federation-orchestrator`.
 
-Initialize the Reports remote:
+Don't recreate these targets by hand; the schematic sets builder options that are easy to get wrong.
 
-```bash
-pnpm nx g @angular-architects/native-federation:init \
-  --project=reports \
-  --port=4202 \
-  --type=remote
-```
+## 7. Configure federation
 
-The schematic performs several important changes:
+The generated configs expose the remote's root component, leave `sharedMappings` commented out and share packages with defaults. Replace them.
 
-1. Creates `federation.config.mjs`.
-2. Creates `tsconfig.federation.json`.
-3. Adds `es-module-shims`.
-4. Renames the original build target to `esbuild`.
-5. Renames the original serve target to `serve-original`.
-6. Introduces the Native Federation build and serve targets.
-7. Splits the Angular bootstrap into `main.ts` and `bootstrap.ts`.
-
-Inspect the generated configuration.
-
-The important target structure should resemble:
-
-```text
-dashboard:
-  build           -> Native Federation builder
-  serve           -> Native Federation builder
-  esbuild         -> Angular Application Builder
-  serve-original  -> Angular dev-server
-```
-
-The same applies to `reports`.
-
-**Important:** Do not manually recreate these targets. Let the official schematic generate them.
-
-## 8. Initialize the Shell as a Dynamic Host
-
-Initialize the Shell after creating and initializing both remotes:
-
-```bash
-pnpm nx g @angular-architects/native-federation:init \
-  --project=shell \
-  --port=4200 \
-  --type=dynamic-host
-```
-
-We explicitly choose `dynamic-host`.
-
-This creates:
-
-```text
-apps/shell/public/federation.manifest.json
-```
-
-The manifest is the runtime configuration that tells the Shell where its remotes are located.
-
-Inspect the generated manifest.
-
-Replace its contents with:
-
-```json
-{
-  "dashboard": "http://localhost:4201/remoteEntry.json",
-  "reports": "http://localhost:4202/remoteEntry.json"
-}
-```
-
-The keys must match the corresponding remote names in their federation configurations.
-
-**Why dynamic host?**
-
-The Shell can load remotes from URLs supplied at runtime.
-
-Changing the manifest does not require rebuilding the Shell.
-
-For example, development and production can use different remote URLs while sharing the same Shell build.
-
----
-
-# Part 5. Configure Federation
-
-## 9. Configure Shared Dependencies
-
-Native Federation has two different sharing mechanisms:
-
-| Mechanism        | Purpose                                                 |
-| ---------------- | ------------------------------------------------------- |
-| `shared`         | npm dependencies from package.json                      |
-| `sharedMappings` | Workspace libraries referenced through TypeScript paths |
-
-We will configure both.
-
-Use the same baseline sharing configuration in all three applications.
-
-### 9.1 Shared npm dependencies
-
-In each application's `federation.config.mjs`, import:
-
-```javascript
-import {
-  withNativeFederation,
-  fromPackageJson,
-  mappingsFromWorkspace,
-} from '@angular-architects/native-federation/config';
-```
-
-Configure shared dependencies:
-
-```javascript
-shared: fromPackageJson({
-  singleton: true,
-  strictVersion: true,
-  requiredVersion: 'auto',
-}).skip([
-  'rxjs/ajax',
-  'rxjs/fetch',
-  'rxjs/testing',
-  'rxjs/webSocket',
-]).patch(['@angular/*'], {
-  includeSecondaries: {
-    keepAll: true,
-  },
-}),
-```
-
-This configuration:
-
-- Shares dependencies declared in package.json.
-- Enforces singleton instances.
-- Checks version compatibility.
-- Keeps Angular secondary entry points together.
-- Excludes unnecessary RxJS entry points.
-
-### 9.2 Shared workspace libraries
-
-Add:
-
-```javascript
-sharedMappings: mappingsFromWorkspace({
-  singleton: true,
-  strictVersion: true,
-}).only([
-  '@client-portal/shared/demo-contracts',
-  '@client-portal/shared/ui',
-]),
-```
-
-This explicitly shares the workspace libraries between the Shell and both remotes.
-
-Do not automatically share every workspace library without a reason. Keep the shared runtime surface intentional.
-
-## 10. Configure the Shell
-
-File:
-
-```text
-apps/shell/federation.config.mjs
-```
-
-Complete example:
-
-```javascript
-import {
-  withNativeFederation,
-  fromPackageJson,
-  mappingsFromWorkspace,
-} from '@angular-architects/native-federation/config';
-
-export default withNativeFederation({
-  name: 'shell',
-
-  shared: fromPackageJson({
-    singleton: true,
-    strictVersion: true,
-    requiredVersion: 'auto',
-  })
-    .skip(['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'])
-    .patch(['@angular/*'], {
-      includeSecondaries: {
-        keepAll: true,
-      },
-    }),
-
-  sharedMappings: mappingsFromWorkspace({
-    singleton: true,
-    strictVersion: true,
-  }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
-});
-```
-
-The Shell does not expose application routes in this demo.
-
-It consumes the routes exposed by the remote applications.
-
-## 11. Configure the Dashboard Remote
-
-File:
-
-```text
-apps/dashboard/federation.config.mjs
-```
+`apps/dashboard/federation.config.mjs`:
 
 ```javascript
 import {
@@ -525,130 +493,68 @@ export default withNativeFederation({
     singleton: true,
     strictVersion: true,
   }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
-});
-```
 
-## 12. Configure the Reports Remote
+  // Please read our docs about configuring native federation:
+  // https://native-federation.com/docs/v4/angular-adapter/configuration/
 
-File:
-
-```text
-apps/reports/federation.config.mjs
-```
-
-Use the same shared dependency configuration, but change the remote name and exposed route:
-
-```javascript
-import {
-  withNativeFederation,
-  fromPackageJson,
-  mappingsFromWorkspace,
-} from '@angular-architects/native-federation/config';
-
-export default withNativeFederation({
-  name: 'reports',
-
-  exposes: {
-    './Routes': './apps/reports/src/app/remote-entry/entry.routes.ts',
+  features: {
+    denseChunking: true,
+    denseExternals: true,
+    strictImports: false,
   },
-
-  shared: fromPackageJson({
-    singleton: true,
-    strictVersion: true,
-    requiredVersion: 'auto',
-  })
-    .skip(['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'])
-    .patch(['@angular/*'], {
-      includeSecondaries: {
-        keepAll: true,
-      },
-    }),
-
-  sharedMappings: mappingsFromWorkspace({
-    singleton: true,
-    strictVersion: true,
-  }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 });
 ```
 
-**Configuration rules:**
+`apps/reports/federation.config.mjs` is identical except `name: 'reports'` and the exposed path `./apps/reports/src/app/remote-entry/entry.routes.ts`. `apps/shell/federation.config.mjs` is identical except `name: 'shell'` and no `exposes` block: the shell consumes routes and exposes nothing.
 
-- Federation names must be unique.
-- Manifest keys must match federation names.
-- Exposed module paths must exist.
-- Shared dependency configuration should be consistent across participating applications.
-- Do not expose internal implementation details unnecessarily.
+| Option                                           | Why                                                                                                                                     |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                           | Must be unique and must equal the remote's key in the shell's manifest.                                                                 |
+| `exposes['./Routes']`                            | A remote exposes a route array, not a component, so it owns its own child routes. The shell asks for `'./Routes'` by this exact key.    |
+| `fromPackageJson({ singleton, strictVersion })`  | Shares every dependency in `package.json` as one runtime instance, and fails on a version mismatch instead of loading a second Angular. |
+| `.skip([...])`                                   | Leaves out RxJS entry points the apps never import.                                                                                     |
+| `.patch(['@angular/*'], { includeSecondaries })` | Shares Angular's secondary entry points (`@angular/common/http`, ...) with their packages.                                              |
+| `sharedMappings ... .only([...])`                | Shares the two workspace libraries through their `tsconfig.base.json` aliases. Keep the list explicit; don't share every library.       |
+| `features`                                       | Kept as generated by `init`.                                                                                                            |
 
----
+All three configs must share the same packages and mappings, so every app agrees on one copy.
 
-# Part 6. Implement the Remote Applications
+## 8. Implement the remotes
 
-## 13. Dashboard Remote
+The steps below use `dashboard`; `reports` is the same with its own names (`rpt-` prefix, `ReportsPage`, path `reports`).
 
-Create the following structure:
+### Startup: `main.ts` and `bootstrap.ts`
 
-```text
-apps/dashboard/src/app/
-├── remote-entry/
-│   └── entry.routes.ts
-├── features/
-│   └── dashboard/
-│       └── dashboard-page.ts
-├── app.routes.ts
-└── app.ts
-```
-
-### 13.1 Create the Dashboard Page
-
-File:
-
-`apps/dashboard/src/app/features/dashboard/dashboard-page.ts`
+Replace the generated `apps/dashboard/src/main.ts`. The generated version imports `./bootstrap` even after `initFederation` fails; this one bootstraps only on success, because the app's Angular imports resolve through the import map that `initFederation` builds:
 
 ```typescript
-import { Component } from '@angular/core';
-import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
+import { initFederation } from '@angular-architects/native-federation';
 
-@Component({
-  selector: 'dsh-dashboard-page',
-  template: `
-    <section>
-      <h1>Dashboard Remote</h1>
-
-      <p>Loaded dynamically by the Shell.</p>
-
-      <p>Platform: {{ brand }}</p>
-
-      <div class="dashboard-grid">
-        <article>
-          <h2>Active users</h2>
-          <strong>1,284</strong>
-        </article>
-
-        <article>
-          <h2>Requests</h2>
-          <strong>24,590</strong>
-        </article>
-
-        <article>
-          <h2>Availability</h2>
-          <strong>99.9%</strong>
-        </article>
-      </div>
-    </section>
-  `,
-})
-export class DashboardPage {
-  protected readonly brand = DEMO_BRAND;
-}
+// Bootstrap only once federation is initialised: the app's Angular imports
+// resolve through the import map that initFederation sets up.
+initFederation(
+  {},
+  {
+    hostRemoteEntry: { url: './remoteEntry.json' },
+  },
+)
+  .then(() => import('./bootstrap'))
+  .catch((error) => console.error('Dashboard startup failed:', error));
 ```
 
-This is a minimal version. The finished page (`apps/dashboard/src/app/features/dashboard/dashboard-page.ts`) builds its frame from the shared `Page`, `SectionHeading` and `DemoBadge` components of `@client-portal/shared/ui`.
+`apps/dashboard/src/bootstrap.ts`:
 
-### 13.2 Expose the Routes
+```typescript
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
 
-File:
+bootstrapApplication(App, appConfig).catch((err) => console.error(err));
+```
 
-`apps/dashboard/src/app/remote-entry/entry.routes.ts`
+### Routes
+
+Create the exposed routes, `apps/dashboard/src/app/remote-entry/entry.routes.ts`:
 
 ```typescript
 import { Routes } from '@angular/router';
@@ -662,11 +568,7 @@ export const REMOTE_ROUTES: Routes = [
 ];
 ```
 
-### 13.3 Configure Local Remote Routing
-
-File:
-
-`apps/dashboard/src/app/app.routes.ts`
+Replace `apps/dashboard/src/app/app.routes.ts`. Standalone, the remote mounts the same routes under the same path the shell uses, so URLs match in both modes:
 
 ```typescript
 import { Routes } from '@angular/router';
@@ -679,142 +581,114 @@ export const appRoutes: Routes = [
 ];
 ```
 
-Replace the generated `NxWelcome` route and delete `nx-welcome.ts`.
+### Root component
 
-The remote can now run independently and also expose its routes to the Shell.
-
-Ensure its root application component contains a router outlet.
-
----
-
-## 14. Reports Remote
-
-Create:
-
-```text
-apps/reports/src/app/
-├── remote-entry/
-│   └── entry.routes.ts
-├── features/
-│   └── reports/
-│       └── reports-page.ts
-├── app.routes.ts
-└── app.ts
-```
-
-### 14.1 Create the Reports Page
-
-File:
-
-`apps/reports/src/app/features/reports/reports-page.ts`
+`apps/dashboard/src/app/app.ts`:
 
 ```typescript
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+@Component({
+  imports: [RouterOutlet],
+  selector: 'dsh-root',
+  templateUrl: './app.html',
+})
+export class App {}
+```
+
+`apps/dashboard/src/app/app.html`:
+
+```html
+<router-outlet></router-outlet>
+```
+
+`app.config.ts` stays as generated: `provideBrowserGlobalErrorListeners()` and `provideRouter(appRoutes)`.
+
+Set the page title in `apps/dashboard/src/index.html` to `Client Portal · Dashboard`.
+
+### Feature page
+
+`apps/dashboard/src/app/features/dashboard/dashboard-page.ts` renders the page with the shared `ui` components and `DEMO_BRAND`. Its structure:
+
+```typescript
+import { Component } from '@angular/core';
+import { DemoBadge, Page, SectionHeading } from '@client-portal/shared/ui';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'rpt-reports-page',
+  imports: [Page, SectionHeading, DemoBadge],
+  selector: 'dsh-dashboard-page',
   template: `
-    <section>
-      <h1>Reports Remote</h1>
-
-      <p>This application is loaded independently.</p>
-
-      <p>Platform: {{ brand }}</p>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Report</th>
-            <th>Status</th>
-            <th>Updated</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr>
-            <td>Monthly overview</td>
-            <td>Ready</td>
-            <td>Today</td>
-          </tr>
-
-          <tr>
-            <td>Performance report</td>
-            <td>Processing</td>
-            <td>Today</td>
-          </tr>
-
-          <tr>
-            <td>Annual summary</td>
-            <td>Ready</td>
-            <td>Yesterday</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <ui-page
+      [eyebrow]="brand + ' / Dashboard'"
+      heading="Dashboard Remote"
+      headingId="dashboard-title"
+      intro="A quick look at your platform, delivered by a federated module."
+    >
+      <ui-demo-badge pageBadge />
+      <!-- page content -->
+    </ui-page>
   `,
+  styleUrl: './dashboard-page.scss',
 })
-export class ReportsPage {
+export class DashboardPage {
   protected readonly brand = DEMO_BRAND;
 }
 ```
 
-This is a minimal version. The finished page (`apps/reports/src/app/features/reports/reports-page.ts`) builds its frame from the shared `Page`, `SectionHeading` and `DemoBadge` components of `@client-portal/shared/ui`.
+Copy the full template and `dashboard-page.scss` (and `reports-page.ts` / `reports-page.scss`) from this repository; they are presentation only.
 
-### 14.2 Expose the Routes
+### Tests and styles
 
-File:
-
-`apps/reports/src/app/remote-entry/entry.routes.ts`
+Replace the generated `app.spec.ts`, which tests the deleted welcome page:
 
 ```typescript
-import { Routes } from '@angular/router';
-import { ReportsPage } from '../features/reports/reports-page';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { App } from './app';
+import { appRoutes } from './app.routes';
 
-export const REMOTE_ROUTES: Routes = [
-  {
-    path: '',
-    component: ReportsPage,
-  },
-];
+describe('App', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [provideRouter(appRoutes)],
+    }).compileComponents();
+  });
+
+  it('redirects the root to the dashboard feature', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/');
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(router.url).toBe('/dashboard');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Dashboard Remote');
+  });
+});
 ```
 
-### 14.3 Configure Local Routing
+The Inter variable font is self-hosted. Install it once:
 
-File:
-
-`apps/reports/src/app/app.routes.ts`
-
-```typescript
-import { Routes } from '@angular/router';
-import { REMOTE_ROUTES } from './remote-entry/entry.routes';
-
-// Standalone, the remote serves its feature under the same path the shell uses.
-export const appRoutes: Routes = [
-  { path: '', redirectTo: 'reports', pathMatch: 'full' },
-  { path: 'reports', children: REMOTE_ROUTES },
-];
+```bash
+pnpm add @fontsource-variable/inter@5.3.0
 ```
 
-Replace the generated `NxWelcome` route and delete `nx-welcome.ts`.
+`apps/dashboard/src/styles.scss` loads it for standalone runs (inside the shell, the shell's global styles load it):
 
-Both remote applications should now have independent functionality.
+```scss
+// Self-hosted Inter for standalone runs; inside the shell, the shell's global styles load it.
+@use '@fontsource-variable/inter';
+```
 
----
+## 9. Implement the shell
 
-# Part 7. Implement the Shell
+The shell reads the manifest itself and registers each remote **lazily**, on the first navigation to it. Startup fetches no remote code, so a remote that is down never blocks or slows the shell.
 
-## 15. Shell Startup and Lazy Remotes
+### `main.ts`
 
-The Shell reads `federation.manifest.json` itself and registers each remote **lazily**, on the first navigation to it, with `initRemoteEntry` from the `NativeFederationResult` returned by `initFederation`. Startup therefore fetches no remote entries: a remote that is down never blocks or slows the Shell, and its errors only appear when someone opens it.
-
-The typed loader from `nf.as<T>()` replaces the deprecated module-scoped `loadRemoteModule` helper.
-
-## 16. Update Shell Startup
-
-The Native Federation schematic creates `apps/shell/src/main.ts` and `apps/shell/src/bootstrap.ts`.
-
-Replace the Shell's generated `main.ts` with:
+Replace the generated `apps/shell/src/main.ts`. The generated version passes the manifest path to `initFederation`, which registers every remote at startup:
 
 ```typescript
 import {
@@ -869,7 +743,7 @@ function showStartupError(): void {
 }
 ```
 
-Manifest entries may be relative, so one manifest works on any origin. `apps/shell/src/manifest-urls.ts` resolves them against the page base URL (a separate module so it can be unit-tested; `main.ts` starts fetching as soon as it is imported):
+`apps/shell/src/manifest-urls.ts` resolves relative manifest entries against the page's base URL, so one manifest works on any origin. It is a separate module so it can be unit-tested; importing `main.ts` would start the fetch.
 
 ```typescript
 import { type FederationManifest } from '@angular-architects/native-federation';
@@ -890,28 +764,9 @@ export function resolveManifestUrls(
 }
 ```
 
-If the manifest cannot be loaded, Angular cannot start either (its imports resolve through the federation import map), so the error message is plain DOM. Style it in `apps/shell/src/styles.scss`:
+### `bootstrap.ts` and `app.config.ts`
 
-```scss
-// Rendered by main.ts when the shell cannot start (no Angular available).
-.startup-error {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 64px 24px;
-
-  &__title {
-    margin: 0;
-  }
-
-  &__message {
-    color: #64748b;
-  }
-}
-```
-
-## 17. Update the Shell Bootstrap Function
-
-`apps/shell/src/bootstrap.ts` passes the federation runtime and the manifest to the application configuration:
+`apps/shell/src/bootstrap.ts` passes the federation runtime and the manifest on to the app config:
 
 ```typescript
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -927,11 +782,7 @@ export const bootstrap = (nf: NativeFederationResult, manifest: FederationManife
   bootstrapApplication(App, appConfig(nf, manifest));
 ```
 
-If the generated root component is named `AppComponent` or has a different filename, use its actual generated name.
-
-## 18. Configure Shell Application Providers
-
-`apps/shell/src/app/app.config.ts`:
+`apps/shell/src/app/app.config.ts` becomes a function and registers a navigation error handler:
 
 ```typescript
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
@@ -955,9 +806,7 @@ export const appConfig = (
 });
 ```
 
-Merge this with any existing application providers rather than removing them.
-
-The navigation error handler, `apps/shell/src/app/remote-navigation-error.ts`, sends failed navigations to a fallback page:
+`apps/shell/src/app/remote-navigation-error.ts` sends a failed navigation to the fallback page and keeps the attempted URL for **Try again**:
 
 ```typescript
 import { inject } from '@angular/core';
@@ -978,74 +827,9 @@ export const redirectToRemoteUnavailable = (error: NavigationError): RedirectCom
 };
 ```
 
-## 19. Configure Shell Routes
+### Remote registry and routes
 
-### 19.1 Home Page
-
-Create a home page that links to the remotes, for example:
-
-```bash
-pnpm nx g @nx/angular:component apps/shell/src/app/home-page --inlineTemplate --style=scss
-```
-
-Give it links to `/dashboard` and `/reports`. The finished version is `apps/shell/src/app/home-page.ts`.
-
-### 19.2 Fallback Page
-
-`apps/shell/src/app/remote-unavailable.ts` is shown when a remote cannot be loaded. **Try again** re-navigates to the failed URL (only in-app paths are accepted from the query parameter):
-
-```typescript
-import { Component, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-
-@Component({
-  selector: 'shl-remote-unavailable',
-  imports: [RouterLink],
-  template: `
-    <section class="remote-unavailable" aria-labelledby="remote-unavailable-title">
-      <h1 id="remote-unavailable-title" class="remote-unavailable__title">
-        Remote application unavailable
-      </h1>
-      <p class="remote-unavailable__message">
-        The requested application could not be loaded. It may be temporarily offline.
-      </p>
-      <div class="remote-unavailable__actions">
-        @if (retryUrl) {
-          <button type="button" class="remote-unavailable__retry-button" (click)="retry()">
-            Try again
-          </button>
-        }
-        <a class="remote-unavailable__home-link" routerLink="/">Back to home</a>
-      </div>
-    </section>
-  `,
-  styleUrl: './remote-unavailable.scss',
-})
-export class RemoteUnavailablePage {
-  private readonly router = inject(Router);
-
-  /** In-app URL whose navigation failed; only same-app absolute paths are accepted. */
-  protected readonly retryUrl = this.parseRetryUrl(
-    inject(ActivatedRoute).snapshot.queryParamMap.get('from'),
-  );
-
-  protected retry(): void {
-    if (this.retryUrl) {
-      void this.router.navigateByUrl(this.retryUrl);
-    }
-  }
-
-  private parseRetryUrl(from: string | null): string | null {
-    return from?.startsWith('/') && !from.startsWith('//') ? from : null;
-  }
-}
-```
-
-Its styles live in `remote-unavailable.scss`.
-
-### 19.3 Routes
-
-The remotes the Shell offers live in one list, `apps/shell/src/app/remotes.ts`. The routes below, the header navigation and the home page cards are generated from it, so adding a remote to the Shell means adding one entry here (plus its URL in `federation.manifest.json`):
+`apps/shell/src/app/remotes.ts` is the one list of remotes. Routes, header links and home page cards are generated from it, so adding a remote means one entry here plus its manifest URL:
 
 ```typescript
 /** The remotes the shell offers. Routes, nav links and home cards are generated from this list. */
@@ -1140,360 +924,171 @@ export const appRoutes = (
 };
 ```
 
-A failed remote load is not cached by the router, so the next visit (or **Try again**) registers and loads the remote again. Unknown URLs go to the home page instead of loading a remote. Each route sets a page `title` ("Client Portal · Dashboard"); the router applies the deepest route title, so the shell route also covers the remote's own untitled routes.
+- `nf.as<RemoteRoutesModule>()` returns a typed loader; it replaces the deprecated module-level `loadRemoteModule` helper.
+- The router applies the deepest route title, so the shell's title also covers the remote's untitled child routes.
+- Unknown URLs go to the home page instead of loading a remote.
 
-## 20. Create the Shell Navigation
+### Fallback page
 
-The root Shell component should provide the shared layout and router outlet.
+`apps/shell/src/app/remote-unavailable.ts`. **Try again** re-navigates to the failed URL; only same-app absolute paths are accepted from the query parameter, so the page cannot redirect off-site:
 
-Example template:
+```typescript
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-```html
-<header class="shell-header">
-  <div class="brand">Client Portal</div>
+@Component({
+  selector: 'shl-remote-unavailable',
+  imports: [RouterLink],
+  template: `
+    <section class="remote-unavailable" aria-labelledby="remote-unavailable-title">
+      <h1 id="remote-unavailable-title" class="remote-unavailable__title">
+        Remote application unavailable
+      </h1>
+      <p class="remote-unavailable__message">
+        The requested application could not be loaded. It may be temporarily offline.
+      </p>
+      <div class="remote-unavailable__actions">
+        @if (retryUrl) {
+          <button type="button" class="remote-unavailable__retry-button" (click)="retry()">
+            Try again
+          </button>
+        }
+        <a class="remote-unavailable__home-link" routerLink="/">Back to home</a>
+      </div>
+    </section>
+  `,
+  styleUrl: './remote-unavailable.scss',
+})
+export class RemoteUnavailablePage {
+  private readonly router = inject(Router);
 
-  <nav>
-    @for (remote of remotes; track remote.name) {
-    <a [routerLink]="'/' + remote.name">{{ remote.label }}</a>
+  /** In-app URL whose navigation failed; only same-app absolute paths are accepted. */
+  protected readonly retryUrl = this.parseRetryUrl(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('from'),
+  );
+
+  protected retry(): void {
+    if (this.retryUrl) {
+      void this.router.navigateByUrl(this.retryUrl);
     }
-  </nav>
-</header>
+  }
 
-<main class="shell-content">
-  <router-outlet />
-</main>
-```
-
-Make sure the standalone root component imports:
-
-```typescript
-import { RouterLink, RouterOutlet } from '@angular/router';
-```
-
-And declares them in its component metadata:
-
-```typescript
-imports: [RouterLink, RouterOutlet];
-```
-
-and exposes the registry to the template with `protected readonly remotes = REMOTES;` (imported from `./remotes`).
-
-After each in-app navigation (not the initial load), the real `App` moves focus to the new page's `h1` (`tabindex="-1"`, set at focus time), so keyboard and screen reader users land on the new page. It listens for `NavigationEnd` and focuses in `afterNextRender`; see `apps/shell/src/app/app.ts`.
-
-The Shell owns navigation and layout.
-
-The remotes own their respective domain features.
-
----
-
-# Part 8. Verify Federation Configuration
-
-## 21. Check the Runtime Manifest
-
-File:
-
-`apps/shell/public/federation.manifest.json`
-
-Expected contents:
-
-```json
-{
-  "dashboard": "http://localhost:4201/remoteEntry.json",
-  "reports": "http://localhost:4202/remoteEntry.json"
+  private parseRetryUrl(from: string | null): string | null {
+    return from?.startsWith('/') && !from.startsWith('//') ? from : null;
+  }
 }
 ```
 
-Verify that:
+### Home page and layout
 
-- Both remote URLs are correct.
-- Remote names match `federation.config.mjs`.
-- The manifest is located in the Shell's public assets.
-- The file is included in the Shell's generated build output.
+- `apps/shell/src/app/home-page.ts`: a card per entry in `REMOTES`, each linking to `/<name>`.
+- `apps/shell/src/app/app.ts` and `app.html`: header with the brand and one `routerLink` per remote (`@for (remote of remotes; track remote.name)`), and `<main class="shell-content"><router-outlet /></main>`. After each in-app navigation, `App` moves focus to the new page's `h1` so keyboard and screen reader users land on the new page.
+- `apps/shell/src/styles.scss`: loads `@fontsource-variable/inter` for the shell and the remotes it hosts, and styles the plain-DOM `.startup-error` message.
 
-## 22. Check the Exposed Modules
+Copy these files, their `.scss` files and the shell specs (`app.spec.ts`, `remote-unavailable.spec.ts`, `manifest-urls.spec.ts`) from this repository. Set the title in `apps/shell/src/index.html` to `Client Portal`.
 
-Dashboard:
+## 10. Module boundaries
 
-```text
-dashboard
-  └── ./Routes
-      └── entry.routes.ts
+The generators already tagged every project (`--tags`). Replace the root `eslint.config.mjs` so `@nx/enforce-module-boundaries` checks those tags:
+
+```javascript
+import nx from '@nx/eslint-plugin';
+
+export default [
+  ...nx.configs['flat/base'],
+  ...nx.configs['flat/typescript'],
+  ...nx.configs['flat/javascript'],
+  {
+    ignores: ['**/dist', '**/out-tsc'],
+  },
+  {
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    rules: {
+      '@nx/enforce-module-boundaries': [
+        'error',
+        {
+          enforceBuildableLibDependency: true,
+          allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
+          // Type: dependencies only point down the layers (app → feature → ui → util).
+          // Scope: an app's code is private to it; only scope:shared crosses apps, so the
+          // shell can reach a remote only at runtime through federation.
+          depConstraints: [
+            {
+              sourceTag: 'type:app',
+              onlyDependOnLibsWithTags: ['type:feature', 'type:ui', 'type:util'],
+            },
+            {
+              sourceTag: 'type:feature',
+              onlyDependOnLibsWithTags: ['type:ui', 'type:util'],
+            },
+            { sourceTag: 'type:ui', onlyDependOnLibsWithTags: ['type:ui', 'type:util'] },
+            { sourceTag: 'type:util', onlyDependOnLibsWithTags: ['type:util'] },
+            { sourceTag: 'scope:shell', onlyDependOnLibsWithTags: ['scope:shell', 'scope:shared'] },
+            {
+              sourceTag: 'scope:dashboard',
+              onlyDependOnLibsWithTags: ['scope:dashboard', 'scope:shared'],
+            },
+            {
+              sourceTag: 'scope:reports',
+              onlyDependOnLibsWithTags: ['scope:reports', 'scope:shared'],
+            },
+            { sourceTag: 'scope:shared', onlyDependOnLibsWithTags: ['scope:shared'] },
+          ],
+        },
+      ],
+    },
+  },
+];
 ```
 
-Reports:
+Each project's own `eslint.config.mjs` (generated) adds the Angular rules and enforces its selector prefix. The rules are explained in [ARCHITECTURE.md](ARCHITECTURE.md#module-boundaries).
 
-```text
-reports
-  └── ./Routes
-      └── entry.routes.ts
-```
+## 11. Quality tooling
 
-The exposed key must match the key used by the Shell:
+### Prettier
 
-```typescript
-loadRemoteModule('dashboard', './Routes');
-```
-
-The remote name must also match the manifest key.
-
-## 23. Check Shared Dependencies
-
-All three applications should have matching federation sharing configuration.
-
-Verify:
-
-- `@angular/core` is shared as a singleton.
-- Angular secondary entry points are included.
-- Strict version checking is enabled.
-- The workspace library is included in `sharedMappings`.
-- The workspace library alias is identical in every application.
-
----
-
-# Part 9. Run the Complete Demo
-
-## 24. Start All Applications
-
-You can start all three applications simultaneously using the parallel workspace task:
-
-```bash
-pnpm start:all
-```
-
-Alternatively, open three separate terminals:
-
-**Terminal 1 — Dashboard:**
-
-```bash
-pnpm nx serve dashboard
-```
-
-**Terminal 2 — Reports:**
-
-```bash
-pnpm nx serve reports
-```
-
-**Terminal 3 — Shell:**
-
-```bash
-pnpm nx serve shell
-```
-
-Open:
-
-```text
-http://localhost:4200
-```
-
-Expected behavior:
-
-1. Shell reads `federation.manifest.json` and initializes Native Federation (no remote entries are fetched yet).
-2. Angular bootstraps the Shell.
-3. The first navigation to Dashboard registers the Dashboard remote from the manifest and loads its routes.
-4. The same happens for Reports.
-5. Both remotes render inside the Shell's router outlet.
-6. If a remote is down, the Shell shows the "Remote application unavailable" page; **Try again** loads it once it is back.
-
-You can also access the remote applications independently:
-
-```text
-http://localhost:4201
-http://localhost:4202
-```
-
-This confirms that each remote remains a runnable Angular application in its own right.
-
----
-
-# Part 10. Production Builds
-
-## 25. Build Applications Independently
-
-Build all applications together:
-
-```bash
-pnpm build:all
-```
-
-Or build each application independently:
-
-Build Dashboard:
-
-```bash
-pnpm nx build dashboard --configuration=production
-```
-
-Build Reports:
-
-```bash
-pnpm nx build reports --configuration=production
-```
-
-Build Shell:
-
-```bash
-pnpm nx build shell --configuration=production
-```
-
-Inspect the generated output.
-
-The expected structure is approximately:
-
-```text
-dist/
-└── apps/
-    ├── shell/
-    │   └── browser/
-    ├── dashboard/
-    │   └── browser/
-    │       ├── remoteEntry.json
-    │       └── ...
-    └── reports/
-        └── browser/
-            ├── remoteEntry.json
-            └── ...
-```
-
-The exact output directory depends on the generated Angular `outputPath` configuration.
-
-Each remote must produce its own `remoteEntry.json`.
-
-The Shell must produce its own application build and runtime manifest.
-
-## 26. Understand the Deployment Model
-
-Each application is independently buildable.
-
-The expected deployment arrangement:
-
-```text
-Production Environment
-
-https://portal.example.com/
-    └── Shell
-
-https://dashboard.example.com/
-    └── Dashboard Remote
-        └── remoteEntry.json
-
-https://reports.example.com/
-    └── Reports Remote
-        └── remoteEntry.json
-```
-
-The Shell manifest would then contain:
+The generator created `.prettierrc` and `.prettierignore`. Set the shared style in `.prettierrc`:
 
 ```json
 {
-  "dashboard": "https://dashboard.example.com/remoteEntry.json",
-  "reports": "https://reports.example.com/remoteEntry.json"
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "tabWidth": 2
 }
 ```
 
-This demonstrates independent remote deployment and runtime URL configuration.
+Add `/node_modules` to `.prettierignore` (it already lists `dist`, `coverage`, the Nx caches, `pnpm-lock.yaml` and `.angular`), then format everything once: `pnpm nx format:write --all`.
 
-### 26.1 Single-Origin / GitHub Pages Subpath Deployment
+`eslint-config-prettier` (installed by the generator) turns off ESLint rules that would fight Prettier.
 
-When deploying all applications to a single origin (such as GitHub Pages or a reverse proxy subpath):
+### Madge
 
-```text
-GitHub Pages Environment
-
-https://oleh-kazban.github.io/angular-nx-native-federation/
-    ├── Shell (Root Base Href)
-    ├── federation.manifest.json
-    ├── .nojekyll
-    ├── 404.html (SPA Fallback)
-    └── remotes/
-        ├── dashboard/
-        │   └── remoteEntry.json
-        └── reports/
-            └── remoteEntry.json
-```
-
-The production manifest uses entries relative to the Shell's base href; the Shell resolves them against `document.baseURI`, so the same bundle works on any origin (a fork's GitHub Pages, a custom domain, a local server):
-
-```json
-{
-  "dashboard": "remotes/dashboard/remoteEntry.json",
-  "reports": "remotes/reports/remoteEntry.json"
-}
-```
-
-Critical GitHub Pages deployment invariants:
-
-- `.nojekyll`: Disables Jekyll processing so files starting with underscores (e.g. `_angular_*.js`) are served instead of returning 404.
-- `404.html`: A duplicate of `index.html` allowing Angular's client-side router to handle deep links and browser refreshes on routes like `/dashboard` and `/reports`.
-
-For a real production deployment, also configure:
-
-- CORS for cross-origin remote assets.
-- Correct asset base paths.
-- SPA fallback routing.
-- Cache policies for remote entries and hashed assets.
-- HTTPS.
-- Version compatibility between shared dependencies.
-
-The development federation server handles the local federation artifacts and cross-origin development requests. Production hosting must provide the corresponding behavior.
-
----
-
-# Part 11. Nx Integration and Quality Gates
-
-## 27. Verify the Nx Project Graph
+Madge finds circular imports between files. Nx module boundaries check imports between projects, not cycles inside them.
 
 ```bash
-pnpm nx show projects
-pnpm nx graph
+pnpm add -D madge@8.0.0
 ```
 
-Inspect the application and library dependencies.
+The script (step 12) runs `madge --circular --extensions ts --ts-config tsconfig.base.json apps libs`. `--ts-config` lets Madge follow the `@client-portal/*` aliases across projects.
 
-The graph should contain:
+### Husky and lint-staged
 
-- Shell.
-- Dashboard remote.
-- Reports remote.
-- Shared contracts library.
-
-Remember that Nx project dependencies and runtime federation relationships are different architectural concepts.
-
-## 28. Verify Builds and Tests
+A pre-commit hook formats staged files and lints affected projects, so nothing unformatted or failing lint reaches a commit.
 
 ```bash
-pnpm nx run-many -t build
-pnpm nx run-many -t test
-pnpm nx run-many -t lint
+pnpm add -D husky@9.1.7 lint-staged@17.6.0
+pnpm exec husky init
 ```
 
-Check formatting:
+`husky init` creates `.husky/pre-commit` and adds `"prepare": "husky"` to `package.json`, so the hook installs itself on every `pnpm install`. Replace the contents of `.husky/pre-commit`:
 
 ```bash
-pnpm nx format:check
+pnpm exec lint-staged && pnpm lint:affected
 ```
 
-Check circular dependencies:
-
-```bash
-pnpm check:circular
-```
-
-## 29. Test Affected Execution
-
-```bash
-pnpm nx affected -t lint test build
-```
-
-Configure the appropriate base branch and Git comparison range in CI.
-
-Nx should be responsible for deciding which projects are affected by a change.
-
-## 30. Git Hooks
-
-Ensure Husky and lint-staged are configured at the workspace root.
-
-Example `package.json` configuration:
+Add the lint-staged config to `package.json`:
 
 ```json
 {
@@ -1503,146 +1098,138 @@ Example `package.json` configuration:
 }
 ```
 
-Example `.husky/pre-commit`:
+lint-staged runs Prettier only on staged files and re-stages them. Linting runs through `nx affected -t lint` instead of `eslint --fix` in lint-staged: ESLint started from the root sees only the root `eslint.config.mjs` and would skip each project's Angular rules.
 
-```bash
-pnpm exec lint-staged && pnpm lint:affected
+## 12. Scripts
+
+Add to `package.json` (`prepare` is already there from `husky init`):
+
+```json
+{
+  "scripts": {
+    "start:all": "nx run-many -t serve -p shell dashboard reports --parallel=3",
+    "start:shell": "nx serve shell",
+    "start:dashboard": "nx serve dashboard",
+    "start:reports": "nx serve reports",
+    "build:all": "nx run-many -t build --parallel=3",
+    "build:dashboard": "nx build dashboard",
+    "build:reports": "nx build reports",
+    "build:shell": "nx build shell",
+    "test:all": "nx run-many -t test",
+    "graph": "nx graph",
+    "lint:all": "nx run-many -t lint",
+    "lint:affected": "nx affected -t lint",
+    "format": "nx format:write --all",
+    "format:uncommitted": "nx format:write --uncommitted",
+    "format:check": "nx format:check --all",
+    "build:gh-pages": "node tools/scripts/build-gh-pages.mjs",
+    "check:circular": "madge --circular --extensions ts --ts-config tsconfig.base.json apps libs",
+    "check:all": "pnpm format:check && pnpm lint:all && pnpm test:all && pnpm check:circular && pnpm build:all",
+    "prepare": "husky"
+  }
+}
 ```
 
-lint-staged formats only the staged files with Prettier and re-stages them. Linting runs through `nx affected -t lint` rather than `eslint --fix` in lint-staged: ESLint invoked from the workspace root only sees the root `eslint.config.mjs`, so it would skip each project's Angular rules.
+Every task goes through Nx, so caching and the project graph apply. `check:all` is the same gate CI runs.
 
-Run a test commit:
+## 13. Run and verify
 
 ```bash
-git add .
-git commit -m "feat: add native federation demo"
+pnpm start:all
 ```
 
----
+Open http://localhost:4200 and check, with the browser's network tab open:
 
-# Part 12. Final Architecture
+1. The shell loads `federation.manifest.json` and no `remoteEntry.json` from ports 4201/4202.
+2. Opening **Dashboard** fetches `http://localhost:4201/remoteEntry.json` and renders the dashboard inside the shell layout. The same goes for **Reports**.
+3. Stop the reports dev server and open **Reports**: the shell shows "Remote application unavailable". Start it again and click **Try again**: the page loads without a reload.
+4. http://localhost:4201 and http://localhost:4202 run each remote on its own.
 
-The completed workspace should resemble:
+Then run the full gate:
+
+```bash
+pnpm check:all
+```
+
+It must pass: formatting, lint (including module boundaries), tests, no circular imports, production builds. Each remote's build output in `dist/apps/<remote>/browser/` contains `remoteEntry.json`. The shell build logs `No shared mapping is reachable from the entry points`; this is expected, because the shell imports neither shared library.
+
+Commit. The pre-commit hook runs on the first commit.
+
+## 14. Deploy to GitHub Pages
+
+### Build script
+
+Copy [`tools/scripts/build-gh-pages.mjs`](tools/scripts/build-gh-pages.mjs) from this repository. `pnpm build:gh-pages` runs it and assembles `dist/gh-pages/`:
+
+1. Builds each remote with `--base-href=<BASE_HREF>remotes/<name>/` and the shell with `--base-href=<BASE_HREF>`.
+2. Copies the shell to the root and each remote to `remotes/<name>/`.
+3. Writes a production `federation.manifest.json` with relative entries (`remotes/dashboard/remoteEntry.json`); the shell resolves them against its base URL.
+4. Adds `.nojekyll`, so GitHub Pages serves files starting with `_` (`_angular_*.js`).
+5. Copies `index.html` to `404.html`, so deep links like `/dashboard` load the app.
+
+`BASE_HREF` defaults to `/angular-nx-native-federation/`, the repository name. Set it when your repository has another name: `BASE_HREF=/my-repo/ pnpm build:gh-pages`.
+
+### Workflow
+
+Copy [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). It runs a `verify` job (the same checks as `check:all`) on every push and pull request to `master`, and a `deploy` job that publishes `dist/gh-pages` to GitHub Pages only from `master`.
+
+In the GitHub repository, open **Settings → Pages** and set **Source** to **GitHub Actions**.
+
+Optionally copy [`.github/dependabot.yml`](.github/dependabot.yml) for weekly grouped dependency updates.
+
+## 15. Final layout
 
 ```text
-client-portal/
-│
+angular-nx-native-federation/
+├── .github/
+│   ├── dependabot.yml
+│   └── workflows/deploy.yml
+├── .husky/pre-commit
 ├── apps/
-│   │
 │   ├── shell/
-│   │   ├── public/
-│   │   │   └── federation.manifest.json
+│   │   ├── public/federation.manifest.json
 │   │   ├── src/
 │   │   │   ├── app/
-│   │   │   │   ├── app.config.ts
-│   │   │   │   ├── app.routes.ts
-│   │   │   │   ├── app.ts
-│   │   │   │   └── remote-unavailable.ts
-│   │   │   ├── main.ts
-│   │   │   └── bootstrap.ts
-│   │   └── federation.config.mjs
-│   │
+│   │   │   │   ├── app.config.ts, app.routes.ts, app.ts, app.html, app.scss
+│   │   │   │   ├── home-page.ts, home-page.scss
+│   │   │   │   ├── remote-navigation-error.ts
+│   │   │   │   ├── remote-unavailable.ts, remote-unavailable.scss
+│   │   │   │   └── remotes.ts
+│   │   │   ├── bootstrap.ts, main.ts, manifest-urls.ts
+│   │   │   ├── index.html, styles.scss, test-setup.ts
+│   │   ├── federation.config.mjs
+│   │   ├── jest.config.cjs
+│   │   ├── project.json
+│   │   └── tsconfig.json, tsconfig.app.json, tsconfig.spec.json, tsconfig.federation.json
 │   ├── dashboard/
 │   │   ├── src/
 │   │   │   ├── app/
-│   │   │   │   ├── features/
-│   │   │   │   │   └── dashboard/
-│   │   │   │   ├── remote-entry/
-│   │   │   │   │   └── entry.routes.ts
-│   │   │   │   └── app.routes.ts
-│   │   │   ├── main.ts
-│   │   │   └── bootstrap.ts
+│   │   │   │   ├── features/dashboard/dashboard-page.ts, dashboard-page.scss
+│   │   │   │   ├── remote-entry/entry.routes.ts
+│   │   │   │   └── app.config.ts, app.routes.ts, app.ts, app.html
+│   │   │   ├── bootstrap.ts, main.ts
+│   │   │   └── index.html, styles.scss, test-setup.ts
 │   │   ├── federation.config.mjs
-│   │   └── tsconfig.federation.json
-│   │
-│   └── reports/
-│       ├── src/
-│       │   ├── app/
-│       │   │   ├── features/
-│       │   │   │   └── reports/
-│       │   │   ├── remote-entry/
-│       │   │   │   └── entry.routes.ts
-│       │   │   └── app.routes.ts
-│       │   ├── main.ts
-│       │   └── bootstrap.ts
-│       ├── federation.config.mjs
-│       └── tsconfig.federation.json
-│
-├── libs/
-│   └── shared/
-│       └── demo-contracts/
-│
-├── tools/
-│
-├── .husky/
+│   │   └── jest.config.cjs, project.json, tsconfig.*.json
+│   └── reports/                   same structure as dashboard
+├── libs/shared/
+│   ├── demo-contracts/src/index.ts
+│   └── ui/src/lib/{page,section-heading,demo-badge}/
+├── tools/scripts/build-gh-pages.mjs
+├── eslint.config.mjs
+├── jest.config.ts, jest.preset.js
 ├── nx.json
-├── package.json
-├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
-├── tsconfig.base.json
-└── eslint.config.mjs
+├── package.json, pnpm-lock.yaml, pnpm-workspace.yaml
+├── .nvmrc, .prettierrc, .prettierignore
+└── tsconfig.base.json
 ```
 
----
+## References
 
-# Part 13. Acceptance Criteria
-
-The demo is complete when all of the following conditions are satisfied.
-
-### Workspace
-
-- [ ] Nx integrated workspace.
-- [ ] pnpm lockfile.
-- [ ] Angular applications generated through Nx.
-- [ ] TypeScript strict mode.
-- [ ] ESLint and Prettier.
-- [ ] Husky and lint-staged.
-- [ ] Madge circular dependency check.
-- [ ] Nx project graph.
-
-### Federation
-
-- [ ] Shell configured as a dynamic host.
-- [ ] Dashboard configured as a remote.
-- [ ] Reports configured as a remote.
-- [ ] Each application has its own `federation.config.mjs`.
-- [ ] Shell has a runtime federation manifest.
-- [ ] Each remote exposes `./Routes`.
-- [ ] Shell loads remote routes lazily.
-- [ ] Shared npm dependencies configured.
-- [ ] Angular singleton and version constraints configured.
-- [ ] Shared workspace library configured through `sharedMappings`.
-
-### Runtime
-
-- [ ] Shell starts successfully.
-- [ ] Dashboard loads inside Shell.
-- [ ] Reports loads inside Shell.
-- [ ] Both remotes work independently.
-- [ ] Browser network requests show remote entry loading.
-- [ ] Route-level remote loading errors have a fallback.
-
-### Production
-
-- [ ] Shell builds independently.
-- [ ] Dashboard builds independently.
-- [ ] Reports builds independently.
-- [ ] Each remote produces `remoteEntry.json`.
-- [ ] Shell manifest can be changed without rebuilding Shell.
-- [ ] Production hosting requirements are documented.
-
----
-
-# Official Documentation
-
-- Nx: https://nx.dev/docs
-- Nx Angular: https://nx.dev/docs/technologies/angular/introduction
-- Nx migration from Module Federation: https://nx.dev/docs/kb/migrate-angular-module-federation
-- Native Federation Angular Adapter: https://native-federation.com/docs/v4/angular-adapter/
-- Native Federation Getting Started: https://native-federation.com/docs/v4/angular-adapter/getting-started/
-- Native Federation Builder: https://native-federation.com/docs/v4/angular-adapter/builder/
-- Native Federation Schematics: https://native-federation.com/docs/v4/angular-adapter/schematics/
-- Native Federation Runtime: https://native-federation.com/docs/v4/angular-adapter/runtime/
-- Native Federation Tutorial: https://native-federation.com/docs/v4/tutorial/
-
-**Architectural objective:** Establish a working reference implementation of an Angular microfrontend platform, with Nx handling monorepo orchestration and Native Federation handling runtime composition. The demo should validate the integration before introducing production-specific concerns such as authentication, deployment pipelines, remote versioning and cross-application communication.
+- [Nx: Angular](https://nx.dev/docs/technologies/angular/introduction), [create-nx-workspace](https://nx.dev/docs/reference/create-nx-workspace), [running tasks](https://nx.dev/docs/features/run-tasks), [affected](https://nx.dev/docs/features/ci-features/affected), [module boundaries](https://nx.dev/docs/features/enforce-module-boundaries)
+- [Native Federation for Angular](https://native-federation.com/docs/v4/angular-adapter/): [getting started](https://native-federation.com/docs/v4/angular-adapter/getting-started/), [schematics](https://native-federation.com/docs/v4/angular-adapter/schematics/), [configuration](https://native-federation.com/docs/v4/angular-adapter/configuration/), [runtime](https://native-federation.com/docs/v4/angular-adapter/runtime/)
+- [pnpm settings](https://pnpm.io/settings)
+- [Husky: get started](https://typicode.github.io/husky/get-started.html), [lint-staged](https://github.com/lint-staged/lint-staged)
+- [Madge](https://github.com/pahen/madge)
+- [jest-preset-angular](https://thymikee.github.io/jest-preset-angular/)
+- [GitHub Pages](https://docs.github.com/en/pages)
