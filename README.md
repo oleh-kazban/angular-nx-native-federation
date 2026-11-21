@@ -120,7 +120,7 @@ Instead of baking static remote entry URLs into application bundles at compile t
 ```
 
 > [!TIP]
-> **Zero Rebuild Deployments:** The exact same Shell container image or production build can be promoted across environments (Dev &rarr; Staging &rarr; Production) purely by mounting an environment-specific `federation.manifest.json` or serving it from an edge configuration service.
+> **Zero Rebuild Deployments:** The exact same Shell container image or production build can be promoted across environments (Dev &rarr; Staging &rarr; Production) purely by mounting an environment-specific `federation.manifest.json` or serving it from an edge configuration service. Note that a plain `nx build shell` copies the development manifest (`localhost` URLs) into `dist/`, so replace it at deploy time (as `build:gh-pages` does).
 
 ### 2. Strict Singleton & Version Negotiation
 
@@ -275,7 +275,7 @@ This automated pipeline:
 3. Assembles the production artifact tree into `dist/gh-pages/`.
 4. Generates the production `federation.manifest.json` with entries relative to the base href (for example `remotes/dashboard/remoteEntry.json`), so the bundle works on any origin. Set `BASE_HREF` to deploy under a different path.
 5. Injects `.nojekyll` to prevent GitHub Pages from filtering underscore-prefixed bundles (`_angular_*.js`).
-6. Copies `index.html` to `404.html` for client-side SPA routing on refresh.
+6. Copies `index.html` to `404.html` for client-side SPA routing on refresh. GitHub Pages serves that fallback with HTTP status 404, so deep links such as `/dashboard` render correctly but report 404 to crawlers and uptime monitors; a host with real SPA rewrites (or hash routing) avoids this.
 
 Automated continuous deployment is pre-configured via `.github/workflows/deploy.yml` on push to `master`. A `verify` job (format check, lint, tests, circular-dependency check) runs first and must pass before the `deploy` job publishes to GitHub Pages; pull requests to `master` run only `verify`.
 
