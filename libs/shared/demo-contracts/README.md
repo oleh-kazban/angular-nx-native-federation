@@ -1,7 +1,13 @@
 # demo-contracts
 
-This library was generated with [Nx](https://nx.dev).
+Framework-free contracts shared by the shell and the remotes, imported as `@client-portal/shared/demo-contracts`.
 
-## Running unit tests
+It currently exports `DEMO_BRAND`, the product name shown by the remote pages.
 
-Run `nx test demo-contracts` to execute the unit tests.
+## How it is shared
+
+Every `federation.config.mjs` lists the library in `sharedMappings`, so the shell and the remotes load one singleton instance at runtime instead of bundling their own copies.
+
+## Tests
+
+The library holds only constants and types, so it has no specs; `nx test demo-contracts` passes with no tests (`passWithNoTests`).

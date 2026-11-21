@@ -1,1 +1,2 @@
-/* You can add global styles to this file, and also import other style files */
+// Self-hosted Inter for standalone runs; inside the shell, the shell's global styles load it.
+@use '@fontsource-variable/inter';

@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
 import { REMOTE_ROUTES } from './remote-entry/entry.routes';
 
+// Standalone, the remote serves its feature under the same path the shell uses.
 export const appRoutes: Routes = [
-  { path: '', component: NxWelcome, pathMatch: 'full' },
+  { path: '', redirectTo: 'reports', pathMatch: 'full' },
   { path: 'reports', children: REMOTE_ROUTES },
 ];

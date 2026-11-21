@@ -1,0 +1,49 @@
+.remote-unavailable {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  box-sizing: border-box;
+
+  &__title {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+
+  &__message {
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  &__retry-button {
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #4f60bd;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid #596bd0;
+      outline-offset: 3px;
+    }
+  }
+
+  &__home-link {
+    color: #4f60bd;
+    font-weight: 600;
+
+    &:focus-visible {
+      outline: 2px solid #596bd0;
+      outline-offset: 3px;
+    }
+  }
+}

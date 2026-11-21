@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      # One lockfile, strict singletons: framework packages must move together.
+      angular:
+        patterns: ['@angular/*', '@angular-devkit/*', '@schematics/angular', 'angular-eslint']
+      nx:
+        patterns: ['nx', '@nx/*']
+      native-federation:
+        patterns: ['@angular-architects/native-federation', '@softarc/*']
+      jest:
+        patterns: ['jest', 'jest-*', '@types/jest', 'ts-jest']
+      # ESLint core, @eslint/js (required by the Nx flat configs) and typescript-eslint move together.
+      eslint:
+        patterns: ['eslint', '@eslint/*', 'typescript-eslint', '@typescript-eslint/*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']

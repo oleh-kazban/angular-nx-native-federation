@@ -1,5 +1,5 @@
 {
-  "name": "@angular-nx-native-federation/source",
+  "name": "@client-portal/source",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -14,15 +14,13 @@
     "test:all": "nx run-many -t test",
     "graph": "nx graph",
     "lint:all": "nx run-many -t lint",
-    "lint:affected": "nx affected:lint",
+    "lint:affected": "nx affected -t lint",
     "format": "nx format:write --all",
     "format:uncommitted": "nx format:write --uncommitted",
     "format:check": "nx format:check --all",
-    "build": "nx run-many -t build",
     "build:gh-pages": "node tools/scripts/build-gh-pages.mjs",
-    "dep-graph": "nx dep-graph",
     "check:circular": "madge --circular --extensions ts --ts-config tsconfig.base.json apps libs",
-    "check:format": "pnpm format:check && pnpm lint && pnpm test && pnpm check:circular",
+    "check:all": "pnpm format:check && pnpm lint:all && pnpm test:all && pnpm check:circular && pnpm build:all",
     "prepare": "husky"
   },
   "private": true,
@@ -30,12 +28,10 @@
     "@angular/common": "22.2.0",
     "@angular/compiler": "22.2.0",
     "@angular/core": "22.2.0",
-    "@angular/forms": "22.2.0",
     "@angular/platform-browser": "22.2.0",
-    "@angular/platform-browser-dynamic": "22.2.0",
     "@angular/router": "22.2.0",
-    "rxjs": "7.8.0",
-    "es-module-shims": "2.8.0"
+    "es-module-shims": "2.8.0",
+    "rxjs": "7.8.0"
   },
   "devDependencies": {
     "@angular-architects/native-federation": "22.2.5",
@@ -45,7 +41,8 @@
     "@angular/cli": "22.2.0",
     "@angular/compiler-cli": "22.2.0",
     "@angular/language-service": "22.2.0",
-    "@eslint/js": "9.8.0",
+    "@eslint/js": "10.0.1",
+    "@fontsource-variable/inter": "5.3.0",
     "@nx/angular": "24.0.6",
     "@nx/eslint": "24.0.6",
     "@nx/eslint-plugin": "24.0.6",
@@ -54,37 +51,32 @@
     "@nx/web": "24.0.6",
     "@nx/workspace": "24.0.6",
     "@schematics/angular": "22.2.0",
-    "@swc/helpers": "0.5.18",
     "@types/jest": "30.0.0",
-    "@types/node": "22.0.0",
+    "@types/node": "24.19.2",
     "@typescript-eslint/utils": "8.58.0",
     "angular-eslint": "22.5.0",
-    "eslint": "9.8.0",
-    "eslint-config-prettier": "10.0.0",
+    "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
     "husky": "9.1.7",
     "jest": "30.3.0",
     "jest-environment-jsdom": "30.3.0",
     "jest-preset-angular": "17.0.0",
-    "jest-util": "30.3.0",
     "jsdom": "27.1.0",
     "lint-staged": "17.6.0",
     "madge": "8.0.0",
     "nx": "24.0.6",
     "prettier": "3.6.2",
-    "ts-jest": "29.4.7",
-    "ts-node": "10.9.1",
-    "tslib": "2.3.0",
+    "ts-jest": "29.4.15",
+    "tslib": "2.9.1",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.58.0",
-    "vitest": "4.0.8",
-    "@softarc/native-federation-orchestrator": "4.10.0"
+    "typescript-eslint": "8.58.0"
   },
   "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
-    ],
-    "*.{html,scss,css,json,md,yml,yaml}": [
+    "*.{ts,tsx,js,jsx,cjs,mjs,html,scss,css,json,md,yml,yaml}": [
       "prettier --write"
     ]
   }

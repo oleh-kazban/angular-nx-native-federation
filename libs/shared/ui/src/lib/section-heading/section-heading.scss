@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 36px 0 20px;
+
+  &__title {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  &__description {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 5px 0 0;
+    font-size: 0.875rem;
+  }
+}

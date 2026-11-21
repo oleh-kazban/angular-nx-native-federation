@@ -10,7 +10,6 @@ export default withNativeFederation({
   exposes: {
     './Routes': './apps/dashboard/src/app/remote-entry/entry.routes.ts',
   },
-  //shareScope: autoShareScope({level: 'minor'}),
 
   shared: fromPackageJson({
     singleton: true,
@@ -23,13 +22,10 @@ export default withNativeFederation({
         keepAll: true,
       },
     }),
-  //sharedMappings: mappingsFromWorkspace({ singleton: true }).filter(['@my-org/*']).get(),
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only(['@client-portal/shared/demo-contracts']),
-
-  skip: ['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'],
+  }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 
   // Please read our docs about configuring native federation:
   // https://native-federation.com/docs/v4/angular-adapter/configuration/

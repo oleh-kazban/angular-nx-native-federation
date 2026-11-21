@@ -1,6 +1,10 @@
 autoInstallPeers: true
+# Allowed: esbuild's install script checks it has the right platform binary.
 onlyBuiltDependencies:
+  - esbuild
   - nx
-packages:
-  - 'apps/*'
-  - 'libs/*'
+# Ignored on purpose: these only compile from source when their bundled prebuilt binary is missing.
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - lmdb
+  - msgpackr-extract

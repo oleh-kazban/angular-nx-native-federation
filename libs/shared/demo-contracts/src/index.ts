@@ -1,1 +1,1 @@
-export * from './lib/demo-contact.models';
+export const DEMO_BRAND = 'Client Portal';

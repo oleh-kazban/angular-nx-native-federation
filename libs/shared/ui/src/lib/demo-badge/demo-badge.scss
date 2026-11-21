@@ -1,0 +1,23 @@
+:host {
+  flex-shrink: 0;
+}
+
+.demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #dce5f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #52647a;
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #14a87a;
+  }
+}

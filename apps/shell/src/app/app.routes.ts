@@ -1,61 +1,65 @@
 import { Routes } from '@angular/router';
-import { type NativeFederationResult } from '@angular-architects/native-federation';
+import {
+  type FederationManifest,
+  type NativeFederationResult,
+} from '@angular-architects/native-federation';
 
 import { HomePage } from './home-page';
-import { RemoteUnavailableComponent } from './remote-unavailable';
+import { RemoteUnavailablePage } from './remote-unavailable';
+import { REMOTES } from './remotes';
 
-export const appRoutes = (nf: Pick<NativeFederationResult, 'as'>): Routes => {
-  const dashboardLoader = nf.as<{
-    REMOTE_ROUTES: Routes;
-  }>();
+// Page titles follow the standalone remotes: "Client Portal · <page>".
+const APP_TITLE = 'Client Portal';
 
-  const reportsLoader = nf.as<{
-    REMOTE_ROUTES: Routes;
-  }>();
+interface RemoteRoutesModule {
+  REMOTE_ROUTES: Routes;
+}
+
+export const appRoutes = (
+  nf: Pick<NativeFederationResult, 'as' | 'initRemoteEntry'>,
+  manifest: FederationManifest,
+): Routes => {
+  const remoteLoader = nf.as<RemoteRoutesModule>();
+  const loadRoutes = (remoteName: string) =>
+    remoteLoader.loadRemoteModule(remoteName, './Routes').then((remote) => remote.REMOTE_ROUTES);
+
+  // Remotes are registered lazily, on the first navigation to them, so the shell
+  // never fetches a remote's entry until it is needed. A failed load is not
+  // caught: the router caches only successful lazy loads, so the next navigation
+  // registers and loads again, and the navigation error handler shows the
+  // fallback page meanwhile. Registering an unreachable remote resolves without
+  // registering it, so the load that follows fails with "not initialized".
+  const loadRemoteRoutes = (remoteName: string) => async () => {
+    const entry = manifest[remoteName];
+    if (!entry) {
+      throw new Error(`Remote '${remoteName}' is not listed in federation.manifest.json`);
+    }
+    await (typeof entry === 'string'
+      ? nf.initRemoteEntry(entry, remoteName)
+      : nf.initRemoteEntry(entry.url, { name: remoteName, integrity: entry.integrity }));
+    return loadRoutes(remoteName);
+  };
 
   return [
     {
       path: '',
       component: HomePage,
       pathMatch: 'full',
+      title: APP_TITLE,
     },
+    ...REMOTES.map((remote) => ({
+      path: remote.name,
+      title: `${APP_TITLE} · ${remote.label}`,
+      loadChildren: loadRemoteRoutes(remote.name),
+    })),
     {
-      path: 'dashboard',
-      loadChildren: () =>
-        dashboardLoader
-          .loadRemoteModule('dashboard', './Routes')
-          .then((remote) => remote.REMOTE_ROUTES)
-          .catch((error) => {
-            console.error('Dashboard remote failed to load:', error);
-
-            return [
-              {
-                path: '',
-                component: RemoteUnavailableComponent,
-              },
-            ];
-          }),
-    },
-    {
-      path: 'reports',
-      loadChildren: () =>
-        reportsLoader
-          .loadRemoteModule('reports', './Routes')
-          .then((remote) => remote.REMOTE_ROUTES)
-          .catch((error) => {
-            console.error('Reports remote failed to load:', error);
-
-            return [
-              {
-                path: '',
-                component: RemoteUnavailableComponent,
-              },
-            ];
-          }),
+      path: 'remote-unavailable',
+      component: RemoteUnavailablePage,
+      title: `${APP_TITLE} · Application unavailable`,
     },
     {
       path: '**',
-      redirectTo: 'dashboard',
+      redirectTo: '',
     },
   ];
 };

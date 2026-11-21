@@ -1,12 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
-  imports: [RouterModule],
-  selector: 'app-root',
+  imports: [RouterOutlet],
+  selector: 'rpt-root',
   templateUrl: './app.html',
-  styleUrl: './app.scss',
 })
-export class App {
-  protected title = 'reports';
-}
+export class App {}

@@ -2,9 +2,9 @@
   "name": "reports",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "prefix": "app",
+  "prefix": "rpt",
   "sourceRoot": "apps/reports/src",
-  "tags": [],
+  "tags": ["type:app", "scope:reports"],
   "targets": {
     "build": {
       "executor": "@angular-architects/native-federation:build",
@@ -33,12 +33,6 @@
         "dev": true,
         "devServer": true,
         "port": 0
-      }
-    },
-    "test": {
-      "executor": "@angular/build:unit-test",
-      "options": {
-        "watch": false
       }
     },
     "serve-static": {
