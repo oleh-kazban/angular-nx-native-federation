@@ -833,6 +833,7 @@ fetch('federation.manifest.json')
     }
     return response.json() as Promise<FederationManifest>;
   })
+  .then(resolveManifestUrls)
   .then((manifest) =>
     initFederation(
       {},
@@ -849,6 +850,18 @@ fetch('federation.manifest.json')
     console.error('Shell startup failed:', error);
     showStartupError();
   });
+
+// Manifest entries may be relative (e.g. `remotes/dashboard/remoteEntry.json`), so
+// one manifest works on any origin; resolve them against the page's base URL.
+function resolveManifestUrls(manifest: FederationManifest): FederationManifest {
+  const resolve = (url: string) => new URL(url, document.baseURI).href;
+  return Object.fromEntries(
+    Object.entries(manifest).map(([name, entry]) => [
+      name,
+      typeof entry === 'string' ? resolve(entry) : { ...entry, url: resolve(entry.url) },
+    ]),
+  );
+}
 
 // Without a working federation import map Angular itself cannot load, so the
 // message is plain DOM (styled by the `startup-error` block in styles.scss).
@@ -1353,12 +1366,12 @@ https://oleh-kazban.github.io/angular-nx-native-federation/
             └── remoteEntry.json
 ```
 
-The production manifest maps the remote URLs accordingly:
+The production manifest uses entries relative to the Shell's base href; the Shell resolves them against `document.baseURI`, so the same bundle works on any origin (a fork's GitHub Pages, a custom domain, a local server):
 
 ```json
 {
-  "dashboard": "https://oleh-kazban.github.io/angular-nx-native-federation/remotes/dashboard/remoteEntry.json",
-  "reports": "https://oleh-kazban.github.io/angular-nx-native-federation/remotes/reports/remoteEntry.json"
+  "dashboard": "remotes/dashboard/remoteEntry.json",
+  "reports": "remotes/reports/remoteEntry.json"
 }
 ```
 

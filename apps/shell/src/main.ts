@@ -13,6 +13,7 @@ fetch('federation.manifest.json')
     }
     return response.json() as Promise<FederationManifest>;
   })
+  .then(resolveManifestUrls)
   .then((manifest) =>
     initFederation(
       {},
@@ -29,6 +30,18 @@ fetch('federation.manifest.json')
     console.error('Shell startup failed:', error);
     showStartupError();
   });
+
+// Manifest entries may be relative (e.g. `remotes/dashboard/remoteEntry.json`), so
+// one manifest works on any origin; resolve them against the page's base URL.
+function resolveManifestUrls(manifest: FederationManifest): FederationManifest {
+  const resolve = (url: string) => new URL(url, document.baseURI).href;
+  return Object.fromEntries(
+    Object.entries(manifest).map(([name, entry]) => [
+      name,
+      typeof entry === 'string' ? resolve(entry) : { ...entry, url: resolve(entry.url) },
+    ]),
+  );
+}
 
 // Without a working federation import map Angular itself cannot load, so the
 // message is plain DOM (styled by the `startup-error` block in styles.scss).

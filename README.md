@@ -250,7 +250,7 @@ This automated pipeline:
 1. Builds `dashboard` and `reports` remotes with their dedicated subpath base hrefs (`/angular-nx-native-federation/remotes/<remote>/`).
 2. Builds `shell` with the root base href (`/angular-nx-native-federation/`).
 3. Assembles the production artifact tree into `dist/gh-pages/`.
-4. Generates the production `federation.manifest.json` pointing to the deployed remote entries.
+4. Generates the production `federation.manifest.json` with entries relative to the base href (for example `remotes/dashboard/remoteEntry.json`), so the bundle works on any origin. Set `BASE_HREF` to deploy under a different path.
 5. Injects `.nojekyll` to prevent GitHub Pages from filtering underscore-prefixed bundles (`_angular_*.js`).
 6. Copies `index.html` to `404.html` for client-side SPA routing on refresh.
 
