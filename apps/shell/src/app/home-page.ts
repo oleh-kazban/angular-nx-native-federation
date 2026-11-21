@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-home-page',
+  selector: 'shl-home-page',
   imports: [RouterLink],
   template: `
     <section class="home-page" aria-labelledby="home-title">

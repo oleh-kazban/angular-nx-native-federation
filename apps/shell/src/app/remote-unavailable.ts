@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-remote-unavailable',
+  selector: 'shl-remote-unavailable',
   imports: [RouterLink],
   template: `
     <section class="remote-unavailable" aria-labelledby="remote-unavailable-title">

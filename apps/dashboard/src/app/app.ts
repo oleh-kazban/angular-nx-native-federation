@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   imports: [RouterOutlet],
-  selector: 'app-root',
+  selector: 'dsh-root',
   templateUrl: './app.html',
 })
 export class App {}

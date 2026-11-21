@@ -6,10 +6,10 @@ import { appRoutes } from './app.routes';
 import { HomePage } from './home-page';
 import { redirectToRemoteUnavailable } from './remote-navigation-error';
 
-@Component({ selector: 'app-dashboard-stub', template: '<h1>Dashboard feature</h1>' })
+@Component({ selector: 'shl-dashboard-stub', template: '<h1>Dashboard feature</h1>' })
 class DashboardStub {}
 
-@Component({ selector: 'app-reports-stub', template: '<h1>Reports feature</h1>' })
+@Component({ selector: 'shl-reports-stub', template: '<h1>Reports feature</h1>' })
 class ReportsStub {}
 
 describe('App', () => {

@@ -604,7 +604,7 @@ import { Component } from '@angular/core';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'app-dashboard-page',
+  selector: 'dsh-dashboard-page',
   template: `
     <section>
       <h1>Dashboard Remote</h1>
@@ -708,7 +708,7 @@ import { Component } from '@angular/core';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'app-reports-page',
+  selector: 'rpt-reports-page',
   template: `
     <section>
       <h1>Reports Remote</h1>
@@ -860,7 +860,7 @@ function resolveManifestUrls(manifest: FederationManifest): FederationManifest {
 // Without a working federation import map Angular itself cannot load, so the
 // message is plain DOM (styled by the `startup-error` block in styles.scss).
 function showStartupError(): void {
-  const root = document.querySelector('app-root') ?? document.body;
+  const root = document.querySelector('shl-root') ?? document.body;
   root.innerHTML = `
     <main class="startup-error" role="alert">
       <h1 class="startup-error__title">Client Portal could not start</h1>
@@ -981,7 +981,7 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-remote-unavailable',
+  selector: 'shl-remote-unavailable',
   imports: [RouterLink],
   template: `
     <section class="remote-unavailable" aria-labelledby="remote-unavailable-title">

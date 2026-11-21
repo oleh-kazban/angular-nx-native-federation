@@ -4,7 +4,7 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
   imports: [Page, SectionHeading, DemoBadge],
-  selector: 'app-dashboard-page',
+  selector: 'dsh-dashboard-page',
   template: `
     <lib-page
       class="dashboard-page"

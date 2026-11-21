@@ -46,7 +46,7 @@ function resolveManifestUrls(manifest: FederationManifest): FederationManifest {
 // Without a working federation import map Angular itself cannot load, so the
 // message is plain DOM (styled by the `startup-error` block in styles.scss).
 function showStartupError(): void {
-  const root = document.querySelector('app-root') ?? document.body;
+  const root = document.querySelector('shl-root') ?? document.body;
   root.innerHTML = `
     <main class="startup-error" role="alert">
       <h1 class="startup-error__title">Client Portal could not start</h1>
