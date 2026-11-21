@@ -2,7 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": ["vitest/globals"]
+    "module": "commonjs",
+    "target": "es2022",
+    "types": ["jest", "node"],
+    "moduleResolution": "bundler"
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+  "files": ["src/test-setup.ts"],
+  "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "src/**/*.d.ts"]
 }

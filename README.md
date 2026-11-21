@@ -255,15 +255,15 @@ Automated continuous deployment is pre-configured via `.github/workflows/deploy.
 
 ## Code Quality, Verification & DX
 
-| Task                  | Command               | Purpose                                                                |
-| :-------------------- | :-------------------- | :--------------------------------------------------------------------- |
-| **Test**              | `pnpm test:all`       | Run all unit tests across the workspace via `@angular/build:unit-test` |
-| **Lint**              | `pnpm lint:all`       | Lint all projects using ESLint flat config (`eslint.config.mjs`)       |
-| **Format Check**      | `pnpm format:check`   | Verify codebase formatting with Prettier                               |
-| **Format Write**      | `pnpm format`         | Auto-format uncommitted or all files with Prettier                     |
-| **Circular Check**    | `pnpm check:circular` | Audit dependency tree with **Madge** to prevent architectural cycles   |
-| **Full Health Check** | `pnpm check:all`      | Comprehensive check: Format + Lint + Tests + Circular Dependencies     |
-| **Project Graph**     | `pnpm graph`          | Visualize Nx dependency graph and project boundaries                   |
+| Task                  | Command               | Purpose                                                                   |
+| :-------------------- | :-------------------- | :------------------------------------------------------------------------ |
+| **Test**              | `pnpm test:all`       | Run all unit tests across the workspace with Jest (`jest-preset-angular`) |
+| **Lint**              | `pnpm lint:all`       | Lint all projects using ESLint flat config (`eslint.config.mjs`)          |
+| **Format Check**      | `pnpm format:check`   | Verify codebase formatting with Prettier                                  |
+| **Format Write**      | `pnpm format`         | Auto-format uncommitted or all files with Prettier                        |
+| **Circular Check**    | `pnpm check:circular` | Audit dependency tree with **Madge** to prevent architectural cycles      |
+| **Full Health Check** | `pnpm check:all`      | Comprehensive check: Format + Lint + Tests + Circular Dependencies        |
+| **Project Graph**     | `pnpm graph`          | Visualize Nx dependency graph and project boundaries                      |
 
 ---
 

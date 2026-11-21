@@ -7,7 +7,7 @@ This repository is an enterprise microfrontend reference architecture demonstrat
 - **Frontend:** Angular 22 (Zoneless, Standalone, Signals, RxJS 7.8), TypeScript 6 (strict mode), SCSS / CSS
 - **Micro Frontends & Bundling:** `@angular-architects/native-federation` 22 (v4 orchestrator, `es-module-shims`), `@angular/build:application` (esbuild + Vite)
 - **Workspace Topology:** Nx 24 integrated monorepo (`apps/`: `shell` dynamic host on `:4200`, `dashboard` remote on `:4201`, `reports` remote on `:4202`; `libs/shared/`: `demo-contracts` shared via `sharedMappings`, `ui`)
-- **Testing:** Vitest 4 (`@angular/build:unit-test`) for apps, Jest 30 (`@nx/jest`, `jest-preset-angular`) for libs
+- **Testing:** Jest 30 (`@nx/jest`, `jest-preset-angular`) for apps and libs
 - **Tooling:** pnpm 10, Nx, ESLint 9 (flat config + `angular-eslint` + `@nx/enforce-module-boundaries`), Prettier 3, Husky 9, lint-staged, Madge 8
 
 ## Non-Negotiable Rules

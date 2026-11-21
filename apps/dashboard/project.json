@@ -35,12 +35,6 @@
         "port": 0
       }
     },
-    "test": {
-      "executor": "@angular/build:unit-test",
-      "options": {
-        "watch": false
-      }
-    },
     "serve-static": {
       "continuous": true,
       "readyWhen": {

@@ -76,7 +76,6 @@
     "tslib": "2.3.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.58.0",
-    "vitest": "4.0.8",
     "@softarc/native-federation-orchestrator": "4.10.0"
   },
   "packageManager": "pnpm@10.30.3",

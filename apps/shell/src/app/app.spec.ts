@@ -6,10 +6,10 @@ import { appRoutes } from './app.routes';
 import { HomePage } from './home-page';
 import { redirectToRemoteUnavailable } from './remote-navigation-error';
 
-@Component({ template: '<h1>Dashboard feature</h1>' })
+@Component({ selector: 'app-dashboard-stub', template: '<h1>Dashboard feature</h1>' })
 class DashboardStub {}
 
-@Component({ template: '<h1>Reports feature</h1>' })
+@Component({ selector: 'app-reports-stub', template: '<h1>Reports feature</h1>' })
 class ReportsStub {}
 
 describe('App', () => {
@@ -100,7 +100,7 @@ describe('shell remote failure', () => {
     // registering an unreachable remote resolves without registering it.
     let remoteUp = false;
     let registered = false;
-    const initRemoteEntry = vi.fn(async () => {
+    const initRemoteEntry = jest.fn(async () => {
       registered = remoteUp;
     });
     const loadRemoteModule = async () => {
@@ -109,7 +109,7 @@ describe('shell remote failure', () => {
       }
       return { REMOTE_ROUTES: [{ path: '', component: DashboardStub }] as Routes };
     };
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
     await TestBed.configureTestingModule({
       imports: [App],
