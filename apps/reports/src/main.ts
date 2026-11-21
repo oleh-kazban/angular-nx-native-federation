@@ -1,11 +1,12 @@
 import { initFederation } from '@angular-architects/native-federation';
 
+// Bootstrap only once federation is initialised: the app's Angular imports
+// resolve through the import map that initFederation sets up.
 initFederation(
   {},
   {
     hostRemoteEntry: { url: './remoteEntry.json' },
   },
 )
-  .catch((err) => console.error(err))
-  .then((_) => import('./bootstrap'))
-  .catch((err) => console.error(err));
+  .then(() => import('./bootstrap'))
+  .catch((error) => console.error('Reports startup failed:', error));
