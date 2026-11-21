@@ -17,15 +17,9 @@ importers:
       '@angular/core':
         specifier: 22.2.0
         version: 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)
-      '@angular/forms':
-        specifier: 22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)))(rxjs@7.8.0)
       '@angular/platform-browser':
         specifier: 22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))
-      '@angular/platform-browser-dynamic':
-        specifier: 22.2.0
-        version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)))
       '@angular/router':
         specifier: 22.2.0
         version: 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)))(rxjs@7.8.0)
@@ -57,39 +51,30 @@ importers:
       '@angular/language-service':
         specifier: 22.2.0
         version: 22.2.0
-      '@eslint/js':
-        specifier: 9.8.0
-        version: 9.8.0
       '@nx/angular':
         specifier: 24.0.6
-        version: 24.0.6(f8aacd7bea7d036851af35f668464552)
+        version: 24.0.6(1a2b1de0ad7568edd0a59ff9c5387e78)
       '@nx/eslint':
         specifier: 24.0.6
-        version: 24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)
+        version: 24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)
       '@nx/eslint-plugin':
         specifier: 24.0.6
         version: 24.0.6(@babel/traverse@7.29.14)(@typescript-eslint/parser@8.58.0(eslint@9.8.0)(typescript@6.0.3))(eslint-config-prettier@10.1.8(eslint@9.8.0))(eslint@9.8.0)(nx@24.0.6)(typescript@6.0.3)
       '@nx/jest':
         specifier: 24.0.6
-        version: 24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)
+        version: 24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)
       '@nx/js':
         specifier: 24.0.6
         version: 24.0.6(@babel/traverse@7.29.14)(nx@24.0.6)
       '@nx/web':
         specifier: 24.0.6
-        version: 24.0.6(bcb258e9a13b7713ad70c1903e0ddcaa)
+        version: 24.0.6(6ea2362fdda60fc4877dc7fd70f4bf18)
       '@nx/workspace':
         specifier: 24.0.6
         version: 24.0.6
       '@schematics/angular':
         specifier: 22.2.0
         version: 22.2.0(chokidar@5.0.0)
-      '@softarc/native-federation-orchestrator':
-        specifier: 4.10.0
-        version: 4.10.0(@softarc/native-federation@4.10.0)
-      '@swc/helpers':
-        specifier: 0.5.18
-        version: 0.5.18
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -120,9 +105,6 @@ importers:
       jest-preset-angular:
         specifier: 17.0.0
         version: 17.0.0(@angular/compiler-cli@22.2.0(@angular/compiler@22.2.0)(typescript@6.0.3))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)))(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(@types/jsdom@21.1.7)(babel-jest@30.5.2(@babel/core@7.29.13))(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(jsdom@27.1.0)(typescript@6.0.3)
-      jest-util:
-        specifier: 30.3.0
-        version: 30.3.0
       jsdom:
         specifier: 27.1.0
         version: 27.1.0
@@ -140,10 +122,7 @@ importers:
         version: 3.6.2
       ts-jest:
         specifier: 29.4.7
-        version: 29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3)
-      ts-node:
-        specifier: 10.9.1
-        version: 10.9.1(@types/node@22.0.0)(typescript@6.0.3)
+        version: 29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3)
       tslib:
         specifier: 2.9.1
         version: 2.9.1
@@ -337,28 +316,9 @@ packages:
       zone.js:
         optional: true
 
-  '@angular/forms@22.2.0':
-    resolution: {integrity: sha512-Nm8o1uBk31EuQGzsK5EunNBVFzTN9MuTYLSrmg1SCPTcava4qK3AzSpl1+Put+cZTTnGtEBIy45AFaxHR2oryg==}
-    engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
-    peerDependencies:
-      '@angular/common': 22.2.0
-      '@angular/core': 22.2.0
-      '@angular/platform-browser': 22.2.0
-      rxjs: ^6.5.3 || ^7.4.0
-
   '@angular/language-service@22.2.0':
     resolution: {integrity: sha512-J1uqzKP2/u5hWp8ShskUyuwp8J9EjbNnAjvmp4Klor9hwtlQ48e4wW8+Wd7ugrxbjDQ57dwHlOoeXuQLRCjonQ==}
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
-
-  '@angular/platform-browser-dynamic@22.2.0':
-    resolution: {integrity: sha512-KG/m6Jz3tKAeXWFYFgEISiEsWSBQusemI+/uafmq2GYiI4cZneCeW35v7mHujgFzVH8jzyJwPyPQtpnKDdGg6g==}
-    engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
-    deprecated: '@angular/platform-browser-dynamic is deprecated. Use `@angular/platform-browser` instead.'
-    peerDependencies:
-      '@angular/common': 22.2.0
-      '@angular/compiler': 22.2.0
-      '@angular/core': 22.2.0
-      '@angular/platform-browser': 22.2.0
 
   '@angular/platform-browser@22.2.0':
     resolution: {integrity: sha512-XMUOyn8WARk9NdFGO3uRgdC3hPrp+2xsSYNeSkaEZ4jI3Pc23f22e4GI8Vayl/UOmShHVn/i+NWfTWh3SEbbSw==}
@@ -2833,9 +2793,6 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
-
-  '@swc/helpers@0.5.18':
-    resolution: {integrity: sha512-TXTnIcNJQEKwThMMqBXsZ4VGAza6bvN4pa41Rkqoio6QBKMvo+5lexeTMScGCIxtzgQJzElcvIltani+adC5PQ==}
 
   '@ts-graphviz/adapter@2.0.6':
     resolution: {integrity: sha512-kJ10lIMSWMJkLkkCG5gt927SnGZcBuG0s0HHswGzcHTgvtUe7yk5/3zTEr0bafzsodsOq5Gi6FhQeV775nC35Q==}
@@ -6507,25 +6464,7 @@ snapshots:
     optionalDependencies:
       '@angular/compiler': 22.2.0
 
-  '@angular/forms@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)))(rxjs@7.8.0)':
-    dependencies:
-      '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0)
-      '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)
-      '@angular/platform-browser': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))
-      '@standard-schema/spec': 1.1.0
-      rxjs: 7.8.0
-      tslib: 2.9.1
-      zod: 4.6.7
-
   '@angular/language-service@22.2.0': {}
-
-  '@angular/platform-browser-dynamic@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/compiler@22.2.0)(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)))':
-    dependencies:
-      '@angular/common': 22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0)
-      '@angular/compiler': 22.2.0
-      '@angular/core': 22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0)
-      '@angular/platform-browser': 22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))
-      tslib: 2.9.1
 
   '@angular/platform-browser@22.2.0(@angular/common@22.2.0(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))(rxjs@7.8.0))(@angular/core@22.2.0(@angular/compiler@22.2.0)(rxjs@7.8.0))':
     dependencies:
@@ -7502,6 +7441,7 @@ snapshots:
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
+    optional: true
 
   '@csstools/color-helpers@5.1.0': {}
 
@@ -8178,6 +8118,7 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.3
       '@jridgewell/sourcemap-codec': 1.6.0
+    optional: true
 
   '@listr2/prompt-adapter-inquirer@4.2.7(@inquirer/prompts@8.7.2(@types/node@22.0.0))(@types/node@22.0.0)(listr2@11.1.0)':
     dependencies:
@@ -8325,12 +8266,12 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.3
 
-  '@nx/angular@24.0.6(f8aacd7bea7d036851af35f668464552)':
+  '@nx/angular@24.0.6(1a2b1de0ad7568edd0a59ff9c5387e78)':
     dependencies:
       '@angular-devkit/core': 22.2.0(chokidar@5.0.0)
       '@angular-devkit/schematics': 22.2.0(chokidar@5.0.0)
       '@nx/devkit': 24.0.6(nx@24.0.6)
-      '@nx/eslint': 24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)
+      '@nx/eslint': 24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)
       '@nx/js': 24.0.6(@babel/traverse@7.29.14)(nx@24.0.6)
       '@phenomnomnominal/tsquery': 6.2.0(typescript@6.0.3)
       '@schematics/angular': 22.2.0(chokidar@5.0.0)
@@ -8393,7 +8334,7 @@ snapshots:
       - typescript
       - verdaccio
 
-  '@nx/eslint@24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)':
+  '@nx/eslint@24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)':
     dependencies:
       '@nx/devkit': 24.0.6(nx@24.0.6)
       '@nx/js': 24.0.6(@babel/traverse@7.29.14)(nx@24.0.6)
@@ -8402,7 +8343,7 @@ snapshots:
       tslib: 2.9.1
       typescript: 6.0.3
     optionalDependencies:
-      '@nx/jest': 24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)
+      '@nx/jest': 24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)
       '@zkochan/js-yaml': 0.0.7
     transitivePeerDependencies:
       - '@babel/traverse'
@@ -8413,7 +8354,7 @@ snapshots:
       - supports-color
       - verdaccio
 
-  '@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)':
+  '@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)':
     dependencies:
       '@nx/devkit': 24.0.6(nx@24.0.6)
       '@nx/js': 24.0.6(@babel/traverse@7.29.14)(nx@24.0.6)
@@ -8430,7 +8371,7 @@ snapshots:
       yargs-parser: 21.1.1
     optionalDependencies:
       jest: 30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))
-      ts-jest: 29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3)
+      ts-jest: 29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -8513,7 +8454,7 @@ snapshots:
   '@nx/nx-win32-x64-msvc@24.0.6':
     optional: true
 
-  '@nx/web@24.0.6(bcb258e9a13b7713ad70c1903e0ddcaa)':
+  '@nx/web@24.0.6(6ea2362fdda60fc4877dc7fd70f4bf18)':
     dependencies:
       '@nx/devkit': 24.0.6(nx@24.0.6)
       '@nx/js': 24.0.6(@babel/traverse@7.29.14)(nx@24.0.6)
@@ -8522,8 +8463,8 @@ snapshots:
       picocolors: 1.1.1
       tslib: 2.9.1
     optionalDependencies:
-      '@nx/eslint': 24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)
-      '@nx/jest': 24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)
+      '@nx/eslint': 24.0.6(@babel/traverse@7.29.14)(@nx/jest@24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3))(@zkochan/js-yaml@0.0.7)(eslint@9.8.0)(nx@24.0.6)
+      '@nx/jest': 24.0.6(@babel/traverse@7.29.14)(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(nx@24.0.6)(ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3))(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3))(typescript@6.0.3)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -8948,11 +8889,8 @@ snapshots:
     dependencies:
       typescript: 6.0.3
 
-  '@standard-schema/spec@1.1.0': {}
-
-  '@swc/helpers@0.5.18':
-    dependencies:
-      tslib: 2.9.1
+  '@standard-schema/spec@1.1.0':
+    optional: true
 
   '@ts-graphviz/adapter@2.0.6':
     dependencies:
@@ -8969,13 +8907,17 @@ snapshots:
       '@ts-graphviz/ast': 2.0.7
       '@ts-graphviz/common': 2.1.5
 
-  '@tsconfig/node10@1.0.14': {}
+  '@tsconfig/node10@1.0.14':
+    optional: true
 
-  '@tsconfig/node12@1.0.11': {}
+  '@tsconfig/node12@1.0.11':
+    optional: true
 
-  '@tsconfig/node14@1.0.3': {}
+  '@tsconfig/node14@1.0.3':
+    optional: true
 
-  '@tsconfig/node16@1.0.4': {}
+  '@tsconfig/node16@1.0.4':
+    optional: true
 
   '@tybys/wasm-util@0.9.0':
     dependencies:
@@ -9402,6 +9344,7 @@ snapshots:
   acorn-walk@8.3.5:
     dependencies:
       acorn: 8.19.0
+    optional: true
 
   acorn@8.19.0: {}
 
@@ -9478,7 +9421,8 @@ snapshots:
 
   app-module-path@2.2.0: {}
 
-  arg@4.1.3: {}
+  arg@4.1.3:
+    optional: true
 
   argparse@1.0.10:
     dependencies:
@@ -9836,7 +9780,8 @@ snapshots:
       path-type: 4.0.0
       yaml: 1.10.3
 
-  create-require@1.1.1: {}
+  create-require@1.1.1:
+    optional: true
 
   cross-spawn@7.0.6:
     dependencies:
@@ -9977,7 +9922,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  diff@4.0.4: {}
+  diff@4.0.4:
+    optional: true
 
   dom-serializer@3.1.1:
     dependencies:
@@ -12565,7 +12511,7 @@ snapshots:
       esbuild: 0.28.2
       jest-util: 30.5.1
 
-  ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.3.0)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3):
+  ts-jest@29.4.7(@babel/core@7.29.13)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.13))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.3.0(@types/node@22.0.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3)))(typescript@6.0.3):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
@@ -12584,7 +12530,7 @@ snapshots:
       '@jest/types': 30.5.1
       babel-jest: 30.5.2(@babel/core@7.29.13)
       esbuild: 0.28.2
-      jest-util: 30.3.0
+      jest-util: 30.5.1
 
   ts-node@10.9.1(@types/node@22.0.0)(typescript@6.0.3):
     dependencies:
@@ -12603,6 +12549,7 @@ snapshots:
       typescript: 6.0.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+    optional: true
 
   tsconfig-paths@4.2.0:
     dependencies:
@@ -12701,7 +12648,8 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  v8-compile-cache-lib@3.0.1: {}
+  v8-compile-cache-lib@3.0.1:
+    optional: true
 
   v8-to-istanbul@9.3.0:
     dependencies:
@@ -12935,7 +12883,8 @@ snapshots:
       y18n: 5.0.8
       yargs-parser: 22.0.0
 
-  yn@3.1.1: {}
+  yn@3.1.1:
+    optional: true
 
   yocto-queue@0.1.0: {}
 
