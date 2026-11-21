@@ -1065,6 +1065,9 @@ import { HomePage } from './home-page';
 import { RemoteUnavailablePage } from './remote-unavailable';
 import { REMOTES } from './remotes';
 
+// Page titles follow the standalone remotes: "Client Portal · <page>".
+const APP_TITLE = 'Client Portal';
+
 interface RemoteRoutesModule {
   REMOTE_ROUTES: Routes;
 }
@@ -1099,14 +1102,17 @@ export const appRoutes = (
       path: '',
       component: HomePage,
       pathMatch: 'full',
+      title: APP_TITLE,
     },
     ...REMOTES.map((remote) => ({
       path: remote.name,
+      title: `${APP_TITLE} · ${remote.label}`,
       loadChildren: loadRemoteRoutes(remote.name),
     })),
     {
       path: 'remote-unavailable',
       component: RemoteUnavailablePage,
+      title: `${APP_TITLE} · Application unavailable`,
     },
     {
       path: '**',
@@ -1116,7 +1122,7 @@ export const appRoutes = (
 };
 ```
 
-A failed remote load is not cached by the router, so the next visit (or **Try again**) registers and loads the remote again. Unknown URLs go to the home page instead of loading a remote.
+A failed remote load is not cached by the router, so the next visit (or **Try again**) registers and loads the remote again. Unknown URLs go to the home page instead of loading a remote. Each route sets a page `title` ("Client Portal · Dashboard"); the router applies the deepest route title, so the shell route also covers the remote's own untitled routes.
 
 ## 20. Create the Shell Navigation
 
@@ -1153,6 +1159,8 @@ imports: [RouterLink, RouterOutlet];
 ```
 
 and exposes the registry to the template with `protected readonly remotes = REMOTES;` (imported from `./remotes`).
+
+After each in-app navigation (not the initial load), the real `App` moves focus to the new page's `h1` (`tabindex="-1"`, set at focus time), so keyboard and screen reader users land on the new page. It listens for `NavigationEnd` and focuses in `afterNextRender`; see `apps/shell/src/app/app.ts`.
 
 The Shell owns navigation and layout.
 

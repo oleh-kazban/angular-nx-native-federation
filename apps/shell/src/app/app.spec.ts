@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Title } from '@angular/platform-browser';
 import { provideRouter, Router, Routes, withNavigationErrorHandler } from '@angular/router';
 import { App } from './app';
 import { appRoutes } from './app.routes';
@@ -27,7 +28,7 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('navigates between features and marks the active link', async () => {
+  it('navigates between features, marks the active link and focuses the new page heading', async () => {
     const fixture = TestBed.createComponent(App);
     await TestBed.inject(Router).navigateByUrl('/dashboard');
     await fixture.whenStable();
@@ -38,17 +39,21 @@ describe('App', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('Dashboard feature');
     expect(dashboard?.getAttribute('aria-current')).toBe('page');
     expect(reports?.getAttribute('aria-current')).toBeNull();
+    // The initial navigation leaves focus where it is.
+    expect(document.activeElement).toBe(document.body);
 
     reports?.click();
     await fixture.whenStable();
     expect(compiled.querySelector('h1')?.textContent).toContain('Reports feature');
     expect(reports?.getAttribute('aria-current')).toBe('page');
     expect(dashboard?.getAttribute('aria-current')).toBeNull();
+    expect(document.activeElement).toBe(compiled.querySelector('main h1'));
 
     home?.click();
     await fixture.whenStable();
     expect(compiled.querySelector('h1')?.textContent).toContain('Welcome to Client Portal');
     expect(home?.getAttribute('aria-current')).toBe('page');
+    expect(document.activeElement).toBe(compiled.querySelector('main h1'));
     expect(reports?.getAttribute('aria-current')).toBeNull();
   });
 });
@@ -86,6 +91,7 @@ describe('shell home route', () => {
     expect(compiled.querySelector('main a[href="/dashboard"]')).toBeTruthy();
     expect(compiled.querySelector('main a[href="/reports"]')).toBeTruthy();
     expect(remoteLoads).toBe(0);
+    expect(TestBed.inject(Title).getTitle()).toBe('Client Portal');
 
     await TestBed.inject(Router).navigateByUrl('/no-such-page');
     await fixture.whenStable();
@@ -152,6 +158,8 @@ describe('shell remote failure', () => {
     await fixture.whenStable();
     expect(router.url).toBe('/remote-unavailable?from=%2Fdashboard');
     expect(compiled.querySelector('h1')?.textContent).toContain('Remote application unavailable');
+    expect(TestBed.inject(Title).getTitle()).toBe('Client Portal · Application unavailable');
+    expect(document.activeElement).toBe(compiled.querySelector('main h1'));
     expect(initRemoteEntry).toHaveBeenCalledWith(
       'http://remote.test/remoteEntry.json',
       'dashboard',
@@ -162,5 +170,7 @@ describe('shell remote failure', () => {
     await fixture.whenStable();
     expect(router.url).toBe('/dashboard');
     expect(compiled.querySelector('h1')?.textContent).toContain('Dashboard feature');
+    // The shell route title also covers the remote's own (untitled) routes.
+    expect(TestBed.inject(Title).getTitle()).toBe('Client Portal · Dashboard');
   });
 });

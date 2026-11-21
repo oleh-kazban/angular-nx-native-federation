@@ -25,3 +25,9 @@ body {
     line-height: 1.6;
   }
 }
+
+// App moves focus to each new page's h1 (tabindex -1) after navigation; the heading
+// isn't interactive, so it gets no focus ring.
+main h1[tabindex='-1']:focus {
+  outline: none;
+}

@@ -8,6 +8,9 @@ import { HomePage } from './home-page';
 import { RemoteUnavailablePage } from './remote-unavailable';
 import { REMOTES } from './remotes';
 
+// Page titles follow the standalone remotes: "Client Portal · <page>".
+const APP_TITLE = 'Client Portal';
+
 interface RemoteRoutesModule {
   REMOTE_ROUTES: Routes;
 }
@@ -42,14 +45,17 @@ export const appRoutes = (
       path: '',
       component: HomePage,
       pathMatch: 'full',
+      title: APP_TITLE,
     },
     ...REMOTES.map((remote) => ({
       path: remote.name,
+      title: `${APP_TITLE} · ${remote.label}`,
       loadChildren: loadRemoteRoutes(remote.name),
     })),
     {
       path: 'remote-unavailable',
       component: RemoteUnavailablePage,
+      title: `${APP_TITLE} · Application unavailable`,
     },
     {
       path: '**',
