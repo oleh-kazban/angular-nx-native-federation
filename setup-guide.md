@@ -822,7 +822,9 @@ import { resolveManifestUrls } from './manifest-urls';
 
 // The shell reads the manifest itself and registers each remote lazily, on the
 // first navigation to it (see app.routes.ts), so startup fetches no remote entries.
-fetch('federation.manifest.json')
+// `no-cache` revalidates the manifest on every load, so a changed remote URL takes
+// effect at once instead of after the host's cache lifetime (10 min on GitHub Pages).
+fetch('federation.manifest.json', { cache: 'no-cache' })
   .then((response) => {
     if (!response.ok) {
       throw new Error(`federation.manifest.json returned ${response.status}`);
