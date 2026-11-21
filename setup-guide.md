@@ -28,7 +28,7 @@ A practical guide for bootstrapping a production-oriented Angular monorepo with 
 | Formatting          | Prettier                                |
 | Dependency analysis | Madge                                   |
 | Git hooks           | Husky + lint-staged                     |
-| Unit testing        | Vitest                                  |
+| Unit testing        | Jest (`jest-preset-angular`)            |
 
 The guide uses the Angular 22+ Native Federation v4 package naming. The federation adapter must match the installed Angular version.
 
@@ -76,7 +76,7 @@ Select the following options in the interactive setup:
 | Bundler          | esbuild                       |
 | Stylesheet       | SCSS                          |
 | Linter           | ESLint                        |
-| Unit test runner | Vitest                        |
+| Unit test runner | Jest                          |
 | Package manager  | pnpm                          |
 | SSR              | Disabled for the initial demo |
 
@@ -242,6 +242,16 @@ This demonstrates the difference between:
 
 - Sharing npm dependencies.
 - Sharing libraries through Nx workspace TypeScript paths.
+
+### 5.1 Shared UI Library
+
+Create a second library for UI components that the remotes share:
+
+```bash
+pnpm nx g @nx/angular:library libs/shared/ui --importPath=@client-portal/shared/ui --style=scss
+```
+
+It holds presentational components (`Page`, `SectionHeading`, `DemoBadge`) used by both remote feature pages; see `libs/shared/ui/README.md`. A remote's global stylesheet is not loaded when the shell hosts it, so shared visuals belong in components with their own styles, not in a shared stylesheet.
 
 ---
 
@@ -427,10 +437,11 @@ sharedMappings: mappingsFromWorkspace({
   strictVersion: true,
 }).only([
   '@client-portal/shared/demo-contracts',
+  '@client-portal/shared/ui',
 ]),
 ```
 
-This explicitly shares our demo library between the Shell and both remotes.
+This explicitly shares the workspace libraries between the Shell and both remotes.
 
 Do not automatically share every workspace library without a reason. Keep the shared runtime surface intentional.
 
@@ -469,7 +480,7 @@ export default withNativeFederation({
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only(['@client-portal/shared/demo-contracts']),
+  }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 });
 ```
 
@@ -514,7 +525,7 @@ export default withNativeFederation({
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only(['@client-portal/shared/demo-contracts']),
+  }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 });
 ```
 
@@ -557,7 +568,7 @@ export default withNativeFederation({
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only(['@client-portal/shared/demo-contracts']),
+  }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 });
 ```
 
@@ -600,7 +611,6 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
   selector: 'app-dashboard-page',
-  standalone: true,
   template: `
     <section>
       <h1>Dashboard Remote</h1>
@@ -632,6 +642,8 @@ export class DashboardPage {
   protected readonly brand = DEMO_BRAND;
 }
 ```
+
+This is a minimal version. The finished page (`apps/dashboard/src/app/features/dashboard/dashboard-page.ts`) builds its frame from the shared `Page`, `SectionHeading` and `DemoBadge` components of `@client-portal/shared/ui`.
 
 ### 13.2 Expose the Routes
 
@@ -703,7 +715,6 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
   selector: 'app-remote-reports-page',
-  standalone: true,
   template: `
     <section>
       <h1>Reports Remote</h1>
@@ -749,6 +760,8 @@ export class ReportsPage {
 }
 ```
 
+This is a minimal version. The finished page (`apps/reports/src/app/features/reports/reports-page.ts`) builds its frame from the shared `Page`, `SectionHeading` and `DemoBadge` components of `@client-portal/shared/ui`.
+
 ### 14.2 Expose the Routes
 
 File:
@@ -792,130 +805,260 @@ Both remote applications should now have independent functionality.
 
 # Part 7. Implement the Shell
 
-## 15. Create a Remote Loader Contract
+## 15. Shell Startup and Lazy Remotes
 
-The Shell should consume remote routes through Native Federation.
+The Shell reads `federation.manifest.json` itself and registers each remote **lazily**, on the first navigation to it, with `initRemoteEntry` from the `NativeFederationResult` returned by `initFederation`. Startup therefore fetches no remote entries: a remote that is down never blocks or slows the Shell, and its errors only appear when someone opens it.
 
-Use the `NativeFederationResult` returned by `initFederation`.
+The typed loader from `nf.as<T>()` replaces the deprecated module-scoped `loadRemoteModule` helper.
 
-We will pass it into Angular's dependency injection and use its typed loader.
+## 16. Update Shell Startup
 
-This avoids relying on the deprecated module-scoped `loadRemoteModule` helper.
-
-## 16. Update Shell Bootstrap
-
-The Native Federation schematic creates:
-
-```text
-apps/shell/src/main.ts
-apps/shell/src/bootstrap.ts
-```
+The Native Federation schematic creates `apps/shell/src/main.ts` and `apps/shell/src/bootstrap.ts`.
 
 Replace the Shell's generated `main.ts` with:
 
 ```typescript
-import { initFederation, type NativeFederationResult } from '@angular-architects/native-federation';
+import {
+  initFederation,
+  type FederationManifest,
+  type NativeFederationResult,
+} from '@angular-architects/native-federation';
 
-initFederation('federation.manifest.json', {
-  hostRemoteEntry: {
-    url: './remoteEntry.json',
-  },
-})
-  .then((nf: NativeFederationResult) =>
-    import('./bootstrap').then(({ bootstrap }) => bootstrap(nf)),
+// The shell reads the manifest itself and registers each remote lazily, on the
+// first navigation to it (see app.routes.ts), so startup fetches no remote entries.
+fetch('federation.manifest.json')
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`federation.manifest.json returned ${response.status}`);
+    }
+    return response.json() as Promise<FederationManifest>;
+  })
+  .then((manifest) =>
+    initFederation(
+      {},
+      {
+        hostRemoteEntry: {
+          url: './remoteEntry.json',
+        },
+      },
+    ).then((nf: NativeFederationResult) =>
+      import('./bootstrap').then(({ bootstrap }) => bootstrap(nf, manifest)),
+    ),
   )
   .catch((error) => {
-    console.error('Native Federation initialization failed:', error);
+    console.error('Shell startup failed:', error);
+    showStartupError();
   });
+
+// Without a working federation import map Angular itself cannot load, so the
+// message is plain DOM (styled by the `startup-error` block in styles.scss).
+function showStartupError(): void {
+  const root = document.querySelector('app-root') ?? document.body;
+  root.innerHTML = `
+    <main class="startup-error" role="alert">
+      <h1 class="startup-error__title">Client Portal could not start</h1>
+      <p class="startup-error__message">
+        The application configuration could not be loaded. Please reload the page in a moment.
+      </p>
+    </main>
+  `;
+}
 ```
 
-This ensures federation is initialized before Angular bootstraps.
+If the manifest cannot be loaded, Angular cannot start either (its imports resolve through the federation import map), so the error message is plain DOM. Style it in `apps/shell/src/styles.scss`:
 
-The manifest is loaded at runtime.
+```scss
+// Rendered by main.ts when the shell cannot start (no Angular available).
+.startup-error {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 64px 24px;
 
-## 17. Update Shell Bootstrap Function
+  &__title {
+    margin: 0;
+  }
 
-File:
+  &__message {
+    color: #64748b;
+  }
+}
+```
 
-`apps/shell/src/bootstrap.ts`
+## 17. Update the Shell Bootstrap Function
 
-Preserve the generated Angular bootstrap and its existing providers.
-
-The important change is passing the federation runtime to the application configuration:
+`apps/shell/src/bootstrap.ts` passes the federation runtime and the manifest to the application configuration:
 
 ```typescript
 import { bootstrapApplication } from '@angular/platform-browser';
-import { type NativeFederationResult } from '@angular-architects/native-federation';
+import {
+  type FederationManifest,
+  type NativeFederationResult,
+} from '@angular-architects/native-federation';
 
 import { App } from './app/app';
 import { appConfig } from './app/app.config';
 
-export const bootstrap = (nf: NativeFederationResult) => bootstrapApplication(App, appConfig(nf));
+export const bootstrap = (nf: NativeFederationResult, manifest: FederationManifest) =>
+  bootstrapApplication(App, appConfig(nf, manifest));
 ```
 
 If the generated root component is named `AppComponent` or has a different filename, use its actual generated name.
 
 ## 18. Configure Shell Application Providers
 
-File:
-
-`apps/shell/src/app/app.config.ts`
+`apps/shell/src/app/app.config.ts`:
 
 ```typescript
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { type NativeFederationResult } from '@angular-architects/native-federation';
+import { provideRouter, withNavigationErrorHandler } from '@angular/router';
+import {
+  type FederationManifest,
+  type NativeFederationResult,
+} from '@angular-architects/native-federation';
 
 import { appRoutes } from './app.routes';
+import { redirectToRemoteUnavailable } from './remote-navigation-error';
 
-export const appConfig = (nf: NativeFederationResult): ApplicationConfig => ({
-  providers: [provideRouter(appRoutes(nf))],
+export const appConfig = (
+  nf: NativeFederationResult,
+  manifest: FederationManifest,
+): ApplicationConfig => ({
+  providers: [
+    provideRouter(appRoutes(nf, manifest), withNavigationErrorHandler(redirectToRemoteUnavailable)),
+  ],
 });
 ```
 
 Merge this with any existing application providers rather than removing them.
 
-## 19. Configure Shell Routes
-
-Create a fallback component:
-
-`apps/shell/src/app/remote-unavailable.ts`
+The navigation error handler, `apps/shell/src/app/remote-navigation-error.ts`, sends failed navigations to a fallback page:
 
 ```typescript
-import { Component } from '@angular/core';
+import { inject } from '@angular/core';
+import { NavigationError, RedirectCommand, Router } from '@angular/router';
+
+/**
+ * Router navigation error handler: when a navigation fails (typically because a
+ * remote's entry or module could not be loaded), log the error and redirect to
+ * the fallback page, passing the attempted URL so the user can retry it.
+ */
+export const redirectToRemoteUnavailable = (error: NavigationError): RedirectCommand => {
+  console.error(`Navigation to ${error.url} failed:`, error.error);
+
+  const router = inject(Router);
+  return new RedirectCommand(
+    router.createUrlTree(['/remote-unavailable'], { queryParams: { from: error.url } }),
+  );
+};
+```
+
+## 19. Configure Shell Routes
+
+### 19.1 Home Page
+
+Create a home page that links to the remotes, for example:
+
+```bash
+pnpm nx g @nx/angular:component apps/shell/src/app/home-page --inlineTemplate --style=scss
+```
+
+Give it links to `/dashboard` and `/reports`. The finished version is `apps/shell/src/app/home-page.ts`.
+
+### 19.2 Fallback Page
+
+`apps/shell/src/app/remote-unavailable.ts` is shown when a remote cannot be loaded. **Try again** re-navigates to the failed URL (only in-app paths are accepted from the query parameter):
+
+```typescript
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-remote-unavailable',
-  standalone: true,
+  imports: [RouterLink],
   template: `
-    <section>
-      <h2>Remote application unavailable</h2>
-      <p>The requested application could not be loaded.</p>
-      <p>Please try again later.</p>
+    <section class="remote-unavailable" aria-labelledby="remote-unavailable-title">
+      <h1 id="remote-unavailable-title" class="remote-unavailable__title">
+        Remote application unavailable
+      </h1>
+      <p class="remote-unavailable__message">
+        The requested application could not be loaded. It may be temporarily offline.
+      </p>
+      <div class="remote-unavailable__actions">
+        @if (retryUrl) {
+          <button type="button" class="remote-unavailable__retry-button" (click)="retry()">
+            Try again
+          </button>
+        }
+        <a class="remote-unavailable__home-link" routerLink="/">Back to home</a>
+      </div>
     </section>
   `,
+  styleUrl: './remote-unavailable.scss',
 })
-export class RemoteUnavailableComponent {}
+export class RemoteUnavailableComponent {
+  private readonly router = inject(Router);
+
+  /** In-app URL whose navigation failed; only same-app absolute paths are accepted. */
+  protected readonly retryUrl = this.parseRetryUrl(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('from'),
+  );
+
+  protected retry(): void {
+    if (this.retryUrl) {
+      void this.router.navigateByUrl(this.retryUrl);
+    }
+  }
+
+  private parseRetryUrl(from: string | null): string | null {
+    return from?.startsWith('/') && !from.startsWith('//') ? from : null;
+  }
+}
 ```
 
-File:
+Its styles live in `remote-unavailable.scss`.
 
-`apps/shell/src/app/app.routes.ts`
+### 19.3 Routes
+
+`apps/shell/src/app/app.routes.ts`:
 
 ```typescript
 import { Routes } from '@angular/router';
-import { type NativeFederationResult } from '@angular-architects/native-federation';
+import {
+  type FederationManifest,
+  type NativeFederationResult,
+} from '@angular-architects/native-federation';
 
+import { HomePage } from './home-page';
 import { RemoteUnavailableComponent } from './remote-unavailable';
 
-export const appRoutes = (nf: NativeFederationResult): Routes => {
-  const dashboardLoader = nf.as<{
-    REMOTE_ROUTES: Routes;
-  }>();
+interface RemoteRoutesModule {
+  REMOTE_ROUTES: Routes;
+}
 
-  const reportsLoader = nf.as<{
-    REMOTE_ROUTES: Routes;
-  }>();
+export const appRoutes = (
+  nf: Pick<NativeFederationResult, 'as' | 'initRemoteEntry'>,
+  manifest: FederationManifest,
+): Routes => {
+  const remoteLoader = nf.as<RemoteRoutesModule>();
+  const loadRoutes = (remoteName: string) =>
+    remoteLoader.loadRemoteModule(remoteName, './Routes').then((remote) => remote.REMOTE_ROUTES);
+
+  // Remotes are registered lazily, on the first navigation to them, so the shell
+  // never fetches a remote's entry until it is needed. A failed load is not
+  // caught: the router caches only successful lazy loads, so the next navigation
+  // registers and loads again, and the navigation error handler shows the
+  // fallback page meanwhile. Registering an unreachable remote resolves without
+  // registering it, so the load that follows fails with "not initialized".
+  const loadRemoteRoutes = (remoteName: string) => async () => {
+    const entry = manifest[remoteName];
+    if (!entry) {
+      throw new Error(`Remote '${remoteName}' is not listed in federation.manifest.json`);
+    }
+    await (typeof entry === 'string'
+      ? nf.initRemoteEntry(entry, remoteName)
+      : nf.initRemoteEntry(entry.url, { name: remoteName, integrity: entry.integrity }));
+    return loadRoutes(remoteName);
+  };
 
   return [
     {
@@ -925,37 +1068,15 @@ export const appRoutes = (nf: NativeFederationResult): Routes => {
     },
     {
       path: 'dashboard',
-      loadChildren: () =>
-        dashboardLoader
-          .loadRemoteModule('dashboard', './Routes')
-          .then((remote) => remote.REMOTE_ROUTES)
-          .catch((error) => {
-            console.error('Dashboard remote failed to load:', error);
-
-            return [
-              {
-                path: '',
-                component: RemoteUnavailableComponent,
-              },
-            ];
-          }),
+      loadChildren: loadRemoteRoutes('dashboard'),
     },
     {
       path: 'reports',
-      loadChildren: () =>
-        reportsLoader
-          .loadRemoteModule('reports', './Routes')
-          .then((remote) => remote.REMOTE_ROUTES)
-          .catch((error) => {
-            console.error('Reports remote failed to load:', error);
-
-            return [
-              {
-                path: '',
-                component: RemoteUnavailableComponent,
-              },
-            ];
-          }),
+      loadChildren: loadRemoteRoutes('reports'),
+    },
+    {
+      path: 'remote-unavailable',
+      component: RemoteUnavailableComponent,
     },
     {
       path: '**',
@@ -965,7 +1086,7 @@ export const appRoutes = (nf: NativeFederationResult): Routes => {
 };
 ```
 
-The fallback handles route-level loading failures. It does not replace the need to validate remote availability during federation initialization.
+A failed remote load is not cached by the router, so the next visit (or **Try again**) registers and loads the remote again. Unknown URLs go to the home page instead of loading a remote.
 
 ## 20. Create the Shell Navigation
 
@@ -1108,13 +1229,12 @@ http://localhost:4200
 
 Expected behavior:
 
-1. Shell initializes Native Federation.
-2. Shell reads `federation.manifest.json`.
-3. Native Federation resolves the remote entries and shared dependencies.
-4. Angular bootstraps the Shell.
-5. Navigation to Dashboard loads the Dashboard remote.
-6. Navigation to Reports loads the Reports remote.
-7. Both remotes render inside the Shell's router outlet.
+1. Shell reads `federation.manifest.json` and initializes Native Federation (no remote entries are fetched yet).
+2. Angular bootstraps the Shell.
+3. The first navigation to Dashboard registers the Dashboard remote from the manifest and loads its routes.
+4. The same happens for Reports.
+5. Both remotes render inside the Shell's router outlet.
+6. If a remote is down, the Shell shows the "Remote application unavailable" page; **Try again** loads it once it is back.
 
 You can also access the remote applications independently:
 
