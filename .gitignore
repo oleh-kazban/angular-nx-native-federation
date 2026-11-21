@@ -52,3 +52,4 @@ __screenshots__/
 audit*.md
 
 .nx/polygraph.ai/tasks/
+.playwright-mcp/
