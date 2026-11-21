@@ -1,30 +1,26 @@
 import { Component } from '@angular/core';
+import { DemoBadge, Page, SectionHeading } from '@client-portal/shared/ui';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
+  imports: [Page, SectionHeading, DemoBadge],
   selector: 'app-remote-reports-page',
   template: `
-    <section class="reports-page" aria-labelledby="reports-title">
-      <header class="reports-page__header">
-        <div>
-          <p class="reports-page__eyebrow">{{ brand }} / Reports</p>
-          <h1 id="reports-title" class="reports-page__title">Reports Remote</h1>
-          <p class="reports-page__intro">
-            Your reports in one place, delivered by an independent federated module.
-          </p>
-        </div>
-        <span class="demo-badge"><span class="demo-badge__dot"></span> Demo data</span>
-      </header>
+    <lib-page
+      class="reports-page"
+      [eyebrow]="brand + ' / Reports'"
+      heading="Reports Remote"
+      headingId="reports-title"
+      intro="Your reports in one place, delivered by an independent federated module."
+    >
+      <lib-demo-badge pageBadge />
 
-      <div class="section-heading">
-        <div>
-          <h2 class="section-heading__title">Recent reports</h2>
-          <p class="section-heading__description">
-            A snapshot of your latest reports and their status.
-          </p>
-        </div>
-        <span class="section-heading__count">3 reports</span>
-      </div>
+      <lib-section-heading
+        heading="Recent reports"
+        description="A snapshot of your latest reports and their status."
+      >
+        <span class="reports-count">3 reports</span>
+      </lib-section-heading>
 
       <div class="reports-table">
         <table class="reports-table__table">
@@ -76,7 +72,7 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
         </table>
       </div>
       <p class="reports-page__footnote">Sample reports shown for the module federation demo.</p>
-    </section>
+    </lib-page>
   `,
   styleUrl: './reports-page.scss',
 })

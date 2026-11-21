@@ -1,27 +1,24 @@
 import { Component } from '@angular/core';
+import { DemoBadge, Page, SectionHeading } from '@client-portal/shared/ui';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
+  imports: [Page, SectionHeading, DemoBadge],
   selector: 'app-dashboard-page',
   template: `
-    <section class="dashboard-page" aria-labelledby="dashboard-title">
-      <header class="dashboard-page__header">
-        <div>
-          <p class="dashboard-page__eyebrow">{{ brand }} / Dashboard</p>
-          <h1 id="dashboard-title" class="dashboard-page__title">Dashboard Remote</h1>
-          <p class="dashboard-page__intro">
-            A quick look at your platform, delivered by a federated module.
-          </p>
-        </div>
-        <span class="demo-badge"><span class="demo-badge__dot"></span> Demo data</span>
-      </header>
+    <lib-page
+      class="dashboard-page"
+      [eyebrow]="brand + ' / Dashboard'"
+      heading="Dashboard Remote"
+      headingId="dashboard-title"
+      intro="A quick look at your platform, delivered by a federated module."
+    >
+      <lib-demo-badge pageBadge />
 
-      <div class="section-heading">
-        <div>
-          <h2 class="section-heading__title">Platform overview</h2>
-          <p class="section-heading__description">A snapshot of your key metrics.</p>
-        </div>
-      </div>
+      <lib-section-heading
+        heading="Platform overview"
+        description="A snapshot of your key metrics."
+      ></lib-section-heading>
 
       <div class="dashboard-page__metrics">
         <article class="metric-card">
@@ -56,7 +53,7 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
           </p>
         </div>
       </aside>
-    </section>
+    </lib-page>
   `,
   styleUrl: './dashboard-page.scss',
 })

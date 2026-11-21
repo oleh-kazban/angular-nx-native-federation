@@ -58,6 +58,7 @@ flowchart TD
     subgraph SharedDeps ["Shared Singletons & Contracts"]
         AngularShared["@angular/* (Singletons, strictVersion)"]
         ContractsLib["@client-portal/shared/demo-contracts (sharedMappings)"]
+        UiLib["@client-portal/shared/ui (sharedMappings)"]
     end
 
     Manifest -->|Resolves endpoints| Router
@@ -71,12 +72,13 @@ flowchart TD
 
 ### Application Matrix
 
-| Project              | Type          |  Port  | Route Endpoint                        | Exposed Contract                          |    Standalone Runnable?     |
-| :------------------- | :------------ | :----: | :------------------------------------ | :---------------------------------------- | :-------------------------: |
-| **`shell`**          | Dynamic Host  | `4200` | `/` (Home), `/dashboard`, `/reports`  | None (Consumer)                           |             Yes             |
-| **`dashboard`**      | Remote MFE    | `4201` | `/` (Standalone), `/dashboard` (Host) | `./Routes` (`entry.routes.ts`)            |             Yes             |
-| **`reports`**        | Remote MFE    | `4202` | `/` (Standalone), `/reports` (Host)   | `./Routes` (`entry.routes.ts`)            |             Yes             |
-| **`demo-contracts`** | Workspace Lib |  N/A   | TypeScript path mapping               | Data contracts (`DEMO_BRAND`, interfaces) | Shared via `sharedMappings` |
+| Project              | Type          |  Port  | Route Endpoint                        | Exposed Contract                                               |    Standalone Runnable?     |
+| :------------------- | :------------ | :----: | :------------------------------------ | :------------------------------------------------------------- | :-------------------------: |
+| **`shell`**          | Dynamic Host  | `4200` | `/` (Home), `/dashboard`, `/reports`  | None (Consumer)                                                |             Yes             |
+| **`dashboard`**      | Remote MFE    | `4201` | `/` (Standalone), `/dashboard` (Host) | `./Routes` (`entry.routes.ts`)                                 |             Yes             |
+| **`reports`**        | Remote MFE    | `4202` | `/` (Standalone), `/reports` (Host)   | `./Routes` (`entry.routes.ts`)                                 |             Yes             |
+| **`demo-contracts`** | Workspace Lib |  N/A   | TypeScript path mapping               | Data contracts (`DEMO_BRAND`, interfaces)                      | Shared via `sharedMappings` |
+| **`ui`**             | Workspace Lib |  N/A   | TypeScript path mapping               | Shared page components (`Page`, `SectionHeading`, `DemoBadge`) | Shared via `sharedMappings` |
 
 ---
 
@@ -145,7 +147,7 @@ Nx workspace libraries defined in `tsconfig.base.json` paths are shared at runti
 sharedMappings: mappingsFromWorkspace({
   singleton: true,
   strictVersion: true,
-}).only(['@client-portal/shared/demo-contracts']),
+}).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 ```
 
 This avoids publishing internal packages to a private npm registry while ensuring identical memory instances across host and remotes.

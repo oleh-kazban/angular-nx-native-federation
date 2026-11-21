@@ -27,7 +27,7 @@ export default withNativeFederation({
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
-  }).only(['@client-portal/shared/demo-contracts']),
+  }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 
   skip: ['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'],
 

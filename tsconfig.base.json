@@ -20,7 +20,7 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@client-portal/ui": ["./libs/shared/ui/src/index.ts"],
+      "@client-portal/shared/ui": ["./libs/shared/ui/src/index.ts"],
       "@client-portal/shared/demo-contracts": ["./libs/shared/demo-contracts/src/index.ts"]
     }
   },
