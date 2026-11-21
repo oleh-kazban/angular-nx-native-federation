@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { REMOTES } from './remotes';
+
 @Component({
   selector: 'shl-home-page',
   imports: [RouterLink],
@@ -13,28 +15,24 @@ import { RouterLink } from '@angular/router';
       </p>
 
       <div class="home-page__features">
-        <a class="feature-card" routerLink="/dashboard">
-          <span class="feature-card__number" aria-hidden="true">01</span>
-          <h2 class="feature-card__title">
-            Dashboard <span class="feature-card__arrow" aria-hidden="true">&rarr;</span>
-          </h2>
-          <p class="feature-card__description">
-            Explore a snapshot of platform metrics from the dashboard remote.
-          </p>
-        </a>
-        <a class="feature-card" routerLink="/reports">
-          <span class="feature-card__number" aria-hidden="true">02</span>
-          <h2 class="feature-card__title">
-            Reports <span class="feature-card__arrow" aria-hidden="true">&rarr;</span>
-          </h2>
-          <p class="feature-card__description">
-            View sample reports provided by the reports remote.
-          </p>
-        </a>
+        @for (card of cards; track card.name) {
+          <a class="feature-card" [routerLink]="'/' + card.name">
+            <span class="feature-card__number" aria-hidden="true">{{ card.number }}</span>
+            <h2 class="feature-card__title">
+              {{ card.label }} <span class="feature-card__arrow" aria-hidden="true">&rarr;</span>
+            </h2>
+            <p class="feature-card__description">{{ card.description }}</p>
+          </a>
+        }
       </div>
       <p class="home-page__note">The shell loads each remote when you open its feature.</p>
     </section>
   `,
   styleUrl: './home-page.scss',
 })
-export class HomePage {}
+export class HomePage {
+  protected readonly cards = REMOTES.map((remote, index) => ({
+    ...remote,
+    number: String(index + 1).padStart(2, '0'),
+  }));
+}

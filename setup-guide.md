@@ -1027,6 +1027,31 @@ Its styles live in `remote-unavailable.scss`.
 
 ### 19.3 Routes
 
+The remotes the Shell offers live in one list, `apps/shell/src/app/remotes.ts`. The routes below, the header navigation and the home page cards are generated from it, so adding a remote to the Shell means adding one entry here (plus its URL in `federation.manifest.json`):
+
+```typescript
+/** The remotes the shell offers. Routes, nav links and home cards are generated from this list. */
+export interface ShellRemote {
+  /** Remote name in federation.manifest.json; also the route path. */
+  name: string;
+  label: string;
+  description: string;
+}
+
+export const REMOTES: readonly ShellRemote[] = [
+  {
+    name: 'dashboard',
+    label: 'Dashboard',
+    description: 'Explore a snapshot of platform metrics from the dashboard remote.',
+  },
+  {
+    name: 'reports',
+    label: 'Reports',
+    description: 'View sample reports provided by the reports remote.',
+  },
+];
+```
+
 `apps/shell/src/app/app.routes.ts`:
 
 ```typescript
@@ -1038,6 +1063,7 @@ import {
 
 import { HomePage } from './home-page';
 import { RemoteUnavailablePage } from './remote-unavailable';
+import { REMOTES } from './remotes';
 
 interface RemoteRoutesModule {
   REMOTE_ROUTES: Routes;
@@ -1074,14 +1100,10 @@ export const appRoutes = (
       component: HomePage,
       pathMatch: 'full',
     },
-    {
-      path: 'dashboard',
-      loadChildren: loadRemoteRoutes('dashboard'),
-    },
-    {
-      path: 'reports',
-      loadChildren: loadRemoteRoutes('reports'),
-    },
+    ...REMOTES.map((remote) => ({
+      path: remote.name,
+      loadChildren: loadRemoteRoutes(remote.name),
+    })),
     {
       path: 'remote-unavailable',
       component: RemoteUnavailablePage,
@@ -1107,8 +1129,9 @@ Example template:
   <div class="brand">Client Portal</div>
 
   <nav>
-    <a routerLink="/dashboard">Dashboard</a>
-    <a routerLink="/reports">Reports</a>
+    @for (remote of remotes; track remote.name) {
+    <a [routerLink]="'/' + remote.name">{{ remote.label }}</a>
+    }
   </nav>
 </header>
 
@@ -1128,6 +1151,8 @@ And declares them in its component metadata:
 ```typescript
 imports: [RouterLink, RouterOutlet];
 ```
+
+and exposes the registry to the template with `protected readonly remotes = REMOTES;` (imported from `./remotes`).
 
 The Shell owns navigation and layout.
 

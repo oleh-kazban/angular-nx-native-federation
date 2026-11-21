@@ -5,6 +5,7 @@ import { App } from './app';
 import { appRoutes } from './app.routes';
 import { HomePage } from './home-page';
 import { redirectToRemoteUnavailable } from './remote-navigation-error';
+import { REMOTES } from './remotes';
 
 @Component({ selector: 'shl-dashboard-stub', template: '<h1>Dashboard feature</h1>' })
 class DashboardStub {}
@@ -91,6 +92,21 @@ describe('shell home route', () => {
     expect(TestBed.inject(Router).url).toBe('/');
     expect(compiled.querySelector('h1')?.textContent).toContain('Welcome to Client Portal');
     expect(remoteLoads).toBe(0);
+  });
+});
+
+describe('shell remote registry', () => {
+  it('creates a lazy route for every remote in REMOTES', () => {
+    const unused = async () => {
+      throw new Error('not called');
+    };
+    const routes = appRoutes(
+      { as: () => ({ loadRemoteModule: unused, load: unused }), initRemoteEntry: unused },
+      {},
+    );
+    for (const remote of REMOTES) {
+      expect(routes.find((route) => route.path === remote.name)?.loadChildren).toBeDefined();
+    }
   });
 });
 

@@ -6,6 +6,7 @@ import {
 
 import { HomePage } from './home-page';
 import { RemoteUnavailablePage } from './remote-unavailable';
+import { REMOTES } from './remotes';
 
 interface RemoteRoutesModule {
   REMOTE_ROUTES: Routes;
@@ -42,14 +43,10 @@ export const appRoutes = (
       component: HomePage,
       pathMatch: 'full',
     },
-    {
-      path: 'dashboard',
-      loadChildren: loadRemoteRoutes('dashboard'),
-    },
-    {
-      path: 'reports',
-      loadChildren: loadRemoteRoutes('reports'),
-    },
+    ...REMOTES.map((remote) => ({
+      path: remote.name,
+      loadChildren: loadRemoteRoutes(remote.name),
+    })),
     {
       path: 'remote-unavailable',
       component: RemoteUnavailablePage,

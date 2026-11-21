@@ -16,20 +16,15 @@
         ariaCurrentWhenActive="page"
         >Home</a
       >
+      @for (remote of remotes; track remote.name) {
       <a
         class="main-nav__link"
-        routerLink="/dashboard"
+        [routerLink]="'/' + remote.name"
         routerLinkActive="main-nav__link--active"
         ariaCurrentWhenActive="page"
-        >Dashboard</a
+        >{{ remote.label }}</a
       >
-      <a
-        class="main-nav__link"
-        routerLink="/reports"
-        routerLinkActive="main-nav__link--active"
-        ariaCurrentWhenActive="page"
-        >Reports</a
-      >
+      }
     </nav>
     <span class="shell-header__label">Shell application</span>
   </div>
