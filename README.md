@@ -174,6 +174,29 @@ const loadRemoteRoutes = (remoteName: string) => async () => {
 };
 ```
 
+### 5. Module Boundaries (Type & Scope Tags)
+
+`@nx/enforce-module-boundaries` checks every import against two tag dimensions, and lint (`pnpm lint:all`, the pre-commit hook and CI) fails on a violation:
+
+| Type           | May depend on                          |
+| -------------- | -------------------------------------- |
+| `type:app`     | `type:feature`, `type:ui`, `type:util` |
+| `type:feature` | `type:ui`, `type:util`                 |
+| `type:ui`      | `type:ui`, `type:util`                 |
+| `type:util`    | `type:util`                            |
+
+| Scope             | May depend on                     |
+| ----------------- | --------------------------------- |
+| `scope:shell`     | `scope:shell`, `scope:shared`     |
+| `scope:dashboard` | `scope:dashboard`, `scope:shared` |
+| `scope:reports`   | `scope:reports`, `scope:shared`   |
+| `scope:shared`    | `scope:shared`                    |
+
+- **Type** keeps dependencies pointing down the layers: a UI component can never import a feature.
+- **Scope** keeps each app's code private. Only `scope:shared` crosses apps, so the Shell cannot import a remote's code directly; it reaches remotes only at runtime through federation, which keeps them independently built.
+
+Current tags: `shell`, `dashboard` and `reports` are `type:app` with their own scope; `shared/ui` is `type:ui` and `shared/demo-contracts` is `type:util`, both `scope:shared`. Feature code still lives inside the apps (`apps/<remote>/src/app/features/`); when it moves into a library, tag it `type:feature` plus the remote's scope. A new project without matching tags fails lint until it is tagged.
+
 ## Setup & Execution Guide
 
 ### Prerequisites
