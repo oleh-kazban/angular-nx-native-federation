@@ -110,12 +110,17 @@ Verify the root `package.json` contains the package manager declaration:
 }
 ```
 
-Verify `pnpm-workspace.yaml`:
+`pnpm-workspace.yaml` holds pnpm settings only. This is an integrated Nx workspace: one root `package.json` and one lockfile, and apps and libraries have no `package.json` of their own, so it needs no `packages` list. Declare which dependency install scripts may run (pnpm 10 skips them by default):
 
 ```yaml
-packages:
-  - 'apps/*'
-  - 'libs/*'
+autoInstallPeers: true
+onlyBuiltDependencies:
+  - esbuild
+  - nx
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - lmdb
+  - msgpackr-extract
 ```
 
 Install dependencies:

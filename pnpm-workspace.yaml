@@ -8,6 +8,3 @@ ignoredBuiltDependencies:
   - '@parcel/watcher'
   - lmdb
   - msgpackr-extract
-packages:
-  - 'apps/*'
-  - 'libs/*'
