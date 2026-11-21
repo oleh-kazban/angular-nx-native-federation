@@ -20,7 +20,7 @@
     "format:check": "nx format:check --all",
     "build:gh-pages": "node tools/scripts/build-gh-pages.mjs",
     "check:circular": "madge --circular --extensions ts --ts-config tsconfig.base.json apps libs",
-    "check:all": "pnpm format:check && pnpm lint:all && pnpm test:all && pnpm check:circular",
+    "check:all": "pnpm format:check && pnpm lint:all && pnpm test:all && pnpm check:circular && pnpm build:all",
     "prepare": "husky"
   },
   "private": true,

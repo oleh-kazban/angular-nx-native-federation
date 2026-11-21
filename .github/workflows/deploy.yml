@@ -43,6 +43,10 @@ jobs:
       - name: Check circular dependencies
         run: pnpm check:circular
 
+      # Strict template type checking runs only in the Angular compiler, not in lint or Jest.
+      - name: Build
+        run: pnpm build:all
+
   deploy:
     needs: verify
     if: github.event_name != 'pull_request'

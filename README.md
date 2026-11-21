@@ -277,21 +277,21 @@ This automated pipeline:
 5. Injects `.nojekyll` to prevent GitHub Pages from filtering underscore-prefixed bundles (`_angular_*.js`).
 6. Copies `index.html` to `404.html` for client-side SPA routing on refresh. GitHub Pages serves that fallback with HTTP status 404, so deep links such as `/dashboard` render correctly but report 404 to crawlers and uptime monitors; a host with real SPA rewrites (or hash routing) avoids this.
 
-Automated continuous deployment is pre-configured via `.github/workflows/deploy.yml` on push to `master`. A `verify` job (format check, lint, tests, circular-dependency check) runs first and must pass before the `deploy` job publishes to GitHub Pages; pull requests to `master` run only `verify`.
+Automated continuous deployment is pre-configured via `.github/workflows/deploy.yml` on push to `master`. A `verify` job (format check, lint, tests, circular-dependency check, production build) runs first and must pass before the `deploy` job publishes to GitHub Pages; pull requests to `master` run only `verify`.
 
 ---
 
 ## Code Quality, Verification & DX
 
-| Task                  | Command               | Purpose                                                                   |
-| :-------------------- | :-------------------- | :------------------------------------------------------------------------ |
-| **Test**              | `pnpm test:all`       | Run all unit tests across the workspace with Jest (`jest-preset-angular`) |
-| **Lint**              | `pnpm lint:all`       | Lint all projects using ESLint flat config (`eslint.config.mjs`)          |
-| **Format Check**      | `pnpm format:check`   | Verify codebase formatting with Prettier                                  |
-| **Format Write**      | `pnpm format`         | Auto-format all files with Prettier                                       |
-| **Circular Check**    | `pnpm check:circular` | Audit dependency tree with **Madge** to prevent architectural cycles      |
-| **Full Health Check** | `pnpm check:all`      | Comprehensive check: Format + Lint + Tests + Circular Dependencies        |
-| **Project Graph**     | `pnpm graph`          | Visualize Nx dependency graph and project boundaries                      |
+| Task                  | Command               | Purpose                                                                    |
+| :-------------------- | :-------------------- | :------------------------------------------------------------------------- |
+| **Test**              | `pnpm test:all`       | Run all unit tests across the workspace with Jest (`jest-preset-angular`)  |
+| **Lint**              | `pnpm lint:all`       | Lint all projects using ESLint flat config (`eslint.config.mjs`)           |
+| **Format Check**      | `pnpm format:check`   | Verify codebase formatting with Prettier                                   |
+| **Format Write**      | `pnpm format`         | Auto-format all files with Prettier                                        |
+| **Circular Check**    | `pnpm check:circular` | Audit dependency tree with **Madge** to prevent architectural cycles       |
+| **Full Health Check** | `pnpm check:all`      | Comprehensive check: Format + Lint + Tests + Circular Dependencies + Build |
+| **Project Graph**     | `pnpm graph`          | Visualize Nx dependency graph and project boundaries                       |
 
 ---
 
