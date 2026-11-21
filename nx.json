@@ -6,7 +6,6 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
-      "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/eslint.config.mjs",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json",
@@ -14,18 +13,13 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": []
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"]
   },
   "targetDefaults": {
     "build": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": [
-        "production",
-        "^production",
-        "{workspaceRoot}/package.json",
-        "{workspaceRoot}/tsconfig.base.json"
-      ],
+      "inputs": ["production", "^production", "{workspaceRoot}/package.json"],
       "outputs": ["{workspaceRoot}/dist/apps/{projectName}"]
     },
     "@angular/build:application": {
@@ -60,7 +54,7 @@
       "unitTestRunner": "jest"
     },
     "@nx/angular:component": {
-      "style": "css"
+      "style": "scss"
     }
   },
   "workspaceLayout": {

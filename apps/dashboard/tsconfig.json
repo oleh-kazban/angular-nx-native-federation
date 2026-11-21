@@ -2,8 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "isolatedModules": true,
-    "target": "es2022",
-    "emitDecoratorMetadata": false,
     "module": "preserve"
   },
   "angularCompilerOptions": {
