@@ -11,17 +11,13 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('navigates from the welcome page to the dashboard feature', async () => {
+  it('redirects the root to the dashboard feature', async () => {
     const fixture = TestBed.createComponent(App);
-    await TestBed.inject(Router).navigateByUrl('/');
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/');
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Welcome dashboard');
-
-    const link = compiled.querySelector<HTMLAnchorElement>('a[href="/dashboard"]');
-    expect(link).toBeTruthy();
-    link?.click();
-    await fixture.whenStable();
+    expect(router.url).toBe('/dashboard');
     expect(compiled.querySelector('h1')?.textContent).toContain('Dashboard Remote');
     expect(compiled.textContent).toContain('1,284');
     expect(compiled.textContent).toContain('24,590');

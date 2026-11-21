@@ -661,8 +661,14 @@ File:
 import { Routes } from '@angular/router';
 import { REMOTE_ROUTES } from './remote-entry/entry.routes';
 
-export const appRoutes: Routes = REMOTE_ROUTES;
+// Standalone, the remote serves its feature under the same path the shell uses.
+export const appRoutes: Routes = [
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'dashboard', children: REMOTE_ROUTES },
+];
 ```
+
+Replace the generated `NxWelcome` route and delete `nx-welcome.ts`.
 
 The remote can now run independently and also expose its routes to the Shell.
 
@@ -771,8 +777,14 @@ File:
 import { Routes } from '@angular/router';
 import { REMOTE_ROUTES } from './remote-entry/entry.routes';
 
-export const appRoutes: Routes = REMOTE_ROUTES;
+// Standalone, the remote serves its feature under the same path the shell uses.
+export const appRoutes: Routes = [
+  { path: '', redirectTo: 'reports', pathMatch: 'full' },
+  { path: 'reports', children: REMOTE_ROUTES },
+];
 ```
+
+Replace the generated `NxWelcome` route and delete `nx-welcome.ts`.
 
 Both remote applications should now have independent functionality.
 

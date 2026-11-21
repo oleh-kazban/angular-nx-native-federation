@@ -11,17 +11,13 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('navigates from the welcome page to the reports feature', async () => {
+  it('redirects the root to the reports feature', async () => {
     const fixture = TestBed.createComponent(App);
-    await TestBed.inject(Router).navigateByUrl('/');
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/');
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Welcome reports');
-
-    const link = compiled.querySelector<HTMLAnchorElement>('a[href="/reports"]');
-    expect(link).toBeTruthy();
-    link?.click();
-    await fixture.whenStable();
+    expect(router.url).toBe('/reports');
     expect(compiled.querySelector('h1')?.textContent).toContain('Reports Remote');
     expect(compiled.textContent).toContain('Monthly overview');
     expect(compiled.textContent).toContain('Performance report');
