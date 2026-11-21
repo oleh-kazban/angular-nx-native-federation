@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 
 /** Section heading and description, with optional projected content on the right. */
 @Component({
-  selector: 'lib-section-heading',
+  selector: 'ui-section-heading',
   template: `
     <div class="section-heading">
       <div>

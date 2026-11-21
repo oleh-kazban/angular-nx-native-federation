@@ -6,21 +6,21 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
   imports: [Page, SectionHeading, DemoBadge],
   selector: 'rpt-reports-page',
   template: `
-    <lib-page
+    <ui-page
       class="reports-page"
       [eyebrow]="brand + ' / Reports'"
       heading="Reports Remote"
       headingId="reports-title"
       intro="Your reports in one place, delivered by an independent federated module."
     >
-      <lib-demo-badge pageBadge />
+      <ui-demo-badge pageBadge />
 
-      <lib-section-heading
+      <ui-section-heading
         heading="Recent reports"
         description="A snapshot of your latest reports and their status."
       >
         <span class="reports-count">3 reports</span>
-      </lib-section-heading>
+      </ui-section-heading>
 
       <div class="reports-table">
         <table class="reports-table__table">
@@ -72,7 +72,7 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
         </table>
       </div>
       <p class="reports-page__footnote">Sample reports shown for the module federation demo.</p>
-    </lib-page>
+    </ui-page>
   `,
   styleUrl: './reports-page.scss',
 })

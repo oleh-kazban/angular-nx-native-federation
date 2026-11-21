@@ -5,7 +5,7 @@ import { Component, input } from '@angular/core';
  * header, an optional badge (`[pageBadge]`) and the page content below.
  */
 @Component({
-  selector: 'lib-page',
+  selector: 'ui-page',
   template: `
     <section class="page" [attr.aria-labelledby]="headingId()">
       <header class="page__header">

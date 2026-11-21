@@ -6,19 +6,19 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
   imports: [Page, SectionHeading, DemoBadge],
   selector: 'dsh-dashboard-page',
   template: `
-    <lib-page
+    <ui-page
       class="dashboard-page"
       [eyebrow]="brand + ' / Dashboard'"
       heading="Dashboard Remote"
       headingId="dashboard-title"
       intro="A quick look at your platform, delivered by a federated module."
     >
-      <lib-demo-badge pageBadge />
+      <ui-demo-badge pageBadge />
 
-      <lib-section-heading
+      <ui-section-heading
         heading="Platform overview"
         description="A snapshot of your key metrics."
-      ></lib-section-heading>
+      ></ui-section-heading>
 
       <div class="dashboard-page__metrics">
         <article class="metric-card">
@@ -53,7 +53,7 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
           </p>
         </div>
       </aside>
-    </lib-page>
+    </ui-page>
   `,
   styleUrl: './dashboard-page.scss',
 })
