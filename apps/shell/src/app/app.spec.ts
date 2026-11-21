@@ -53,7 +53,7 @@ describe('App', () => {
 });
 
 describe('shell home route', () => {
-  it('renders the home page without loading a remote', async () => {
+  it('renders the home page, also for unknown URLs, without loading a remote', async () => {
     let remoteLoads = 0;
     const loadRemoteModule = async () => {
       remoteLoads++;
@@ -84,6 +84,12 @@ describe('shell home route', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('Welcome to Client Portal');
     expect(compiled.querySelector('main a[href="/dashboard"]')).toBeTruthy();
     expect(compiled.querySelector('main a[href="/reports"]')).toBeTruthy();
+    expect(remoteLoads).toBe(0);
+
+    await TestBed.inject(Router).navigateByUrl('/no-such-page');
+    await fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Welcome to Client Portal');
     expect(remoteLoads).toBe(0);
   });
 });

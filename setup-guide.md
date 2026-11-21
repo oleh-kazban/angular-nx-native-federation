@@ -947,7 +947,7 @@ export const appRoutes = (nf: NativeFederationResult): Routes => {
     },
     {
       path: '**',
-      redirectTo: 'dashboard',
+      redirectTo: '',
     },
   ];
 };
