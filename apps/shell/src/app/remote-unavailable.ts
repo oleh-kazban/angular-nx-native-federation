@@ -6,17 +6,19 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
   imports: [RouterLink],
   template: `
     <section class="remote-unavailable" aria-labelledby="remote-unavailable-title">
-      <h1 id="remote-unavailable-title" class="remote-unavailable-title">
+      <h1 id="remote-unavailable-title" class="remote-unavailable__title">
         Remote application unavailable
       </h1>
-      <p class="remote-unavailable-message">
+      <p class="remote-unavailable__message">
         The requested application could not be loaded. It may be temporarily offline.
       </p>
-      <div class="remote-unavailable-actions">
+      <div class="remote-unavailable__actions">
         @if (retryUrl) {
-          <button type="button" class="retry-button" (click)="retry()">Try again</button>
+          <button type="button" class="remote-unavailable__retry-button" (click)="retry()">
+            Try again
+          </button>
         }
-        <a class="home-link" routerLink="/">Back to home</a>
+        <a class="remote-unavailable__home-link" routerLink="/">Back to home</a>
       </div>
     </section>
   `,

@@ -1,26 +1,37 @@
 <header class="shell-header">
-  <div class="header-content">
+  <div class="shell-header__content">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true">C</span>
+      <span class="brand__mark" aria-hidden="true">C</span>
       <div>
-        <span class="brand-name">Client Portal</span>
-        <span class="brand-caption">Federation demo</span>
+        <span class="brand__name">Client Portal</span>
+        <span class="brand__caption">Federation demo</span>
       </div>
     </div>
-    <nav aria-label="Main navigation">
+    <nav class="main-nav" aria-label="Main navigation">
       <a
+        class="main-nav__link"
         routerLink="/"
-        routerLinkActive="active"
+        routerLinkActive="main-nav__link--active"
         [routerLinkActiveOptions]="{ exact: true }"
         ariaCurrentWhenActive="page"
         >Home</a
       >
-      <a routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page"
+      <a
+        class="main-nav__link"
+        routerLink="/dashboard"
+        routerLinkActive="main-nav__link--active"
+        ariaCurrentWhenActive="page"
         >Dashboard</a
       >
-      <a routerLink="/reports" routerLinkActive="active" ariaCurrentWhenActive="page">Reports</a>
+      <a
+        class="main-nav__link"
+        routerLink="/reports"
+        routerLinkActive="main-nav__link--active"
+        ariaCurrentWhenActive="page"
+        >Reports</a
+      >
     </nav>
-    <span class="shell-label">Shell application</span>
+    <span class="shell-header__label">Shell application</span>
   </div>
 </header>
 

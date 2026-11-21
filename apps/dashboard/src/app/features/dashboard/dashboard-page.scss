@@ -1,0 +1,170 @@
+:host {
+  display: block;
+  color: #17233b;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.dashboard-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  box-sizing: border-box;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid #e5eaf2;
+  }
+
+  &__eyebrow {
+    margin: 0 0 12px;
+    color: #5369b2;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    letter-spacing: -0.04em;
+  }
+
+  &__intro {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 10px 0 0;
+  }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  @media (max-width: 700px) {
+    padding: 32px 16px 48px;
+
+    &__header {
+      flex-direction: column;
+    }
+
+    &__metrics {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.section-heading {
+  margin: 36px 0 20px;
+
+  &__description {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 5px 0 0;
+    font-size: 0.875rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+}
+
+.metric-card {
+  padding: 24px;
+  border: 1px solid #e5eaf2;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(28, 44, 75, 0.04);
+
+  &__description {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 6px 0 0;
+    font-size: 0.8rem;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #52647a;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  &__number {
+    padding: 7px 9px;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #5869c6;
+    font-size: 0.7rem;
+  }
+
+  &__value {
+    display: block;
+    margin-top: 24px;
+    font-size: 2rem;
+    letter-spacing: -0.04em;
+  }
+}
+
+.federation-note {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #f1f5ff;
+
+  &__text {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #dfe7ff;
+    color: #5165c3;
+    font-size: 1.25rem;
+  }
+}
+
+.demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border: 1px solid #dce5f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #52647a;
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #14a87a;
+  }
+}
