@@ -1,333 +1,109 @@
 # Angular + Nx + Native Federation
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="60" alt="Nx Logo" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/angular/angular/main/adev/shared-docs/pipeline/tutorials/common/src/assets/angular.svg" width="60" alt="Angular Logo" />
-</p>
+A micro frontend reference project: one Angular shell loads two independently built Angular apps at runtime with [Native Federation](https://native-federation.com/), inside an [Nx](https://nx.dev/) monorepo.
 
-<p align="center">
-  <strong>Enterprise Reference Architecture for Browser-Native Micro Frontends</strong><br />
-  <em>Demonstrating the power of Native Federation with Angular, Nx, esbuild, and Vite.</em>
-</p>
+**Live demo:** https://oleh-kazban.github.io/angular-nx-native-federation/
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Angular-22+-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" />
-  <img src="https://img.shields.io/badge/Nx-24-143055?style=for-the-badge&logo=nx&logoColor=white" alt="Nx" />
-  <img src="https://img.shields.io/badge/pnpm-10+-F69220?style=for-the-badge&logo=pnpm&logoColor=white" alt="pnpm" />
-  <img src="https://img.shields.io/badge/esbuild-Supported-FFCF00?style=for-the-badge&logo=esbuild&logoColor=black" alt="esbuild" />
-  <img src="https://img.shields.io/badge/Native_Federation-v4-007ACC?style=for-the-badge&logo=javascript&logoColor=white" alt="Native Federation" />
-  <img src="https://img.shields.io/badge/Architecture-Microfrontend-8A2BE2?style=for-the-badge" alt="Microfrontends" />
-  <img src="https://img.shields.io/badge/Prettier-3.6+-F7B93E?style=for-the-badge&logo=prettier&logoColor=black" alt="Prettier" />
-  <img src="https://img.shields.io/badge/Husky-9.1+-4E5759?style=for-the-badge&logo=git&logoColor=white" alt="Husky" />
-  <img src="https://img.shields.io/badge/Madge-Circular_Check-22C55E?style=for-the-badge" alt="Madge" />
-</p>
+- **Shell** (`:4200`) owns the layout and navigation, and loads each remote on its first visit.
+- **Dashboard** (`:4201`) and **Reports** (`:4202`) are remotes. Each one also runs on its own.
+- If a remote is down, the shell keeps working and shows a fallback page with **Try again**.
 
----
+Stack: Angular 22 (zoneless, standalone, signals), `@angular-architects/native-federation` 22, Nx 24, TypeScript 6, Jest 30, pnpm 10.
 
-## Architectural Overview
-
-Modern Angular has transitioned to the official **Application Builder** (`@angular/build:application`), pairing **esbuild** for high-performance builds with **Vite** for local development. However, classical Webpack Module Federation relies on Webpack compiler internals, chunk-loading runtimes, and tapable hooks that cannot operate under an esbuild pipeline.
-
-**Native Federation** (`@angular-architects/native-federation`) solves this paradigm shift by utilizing standard browser-native mechanisms:
-
-1. **ECMAScript Modules (ESM)** as the universal module format.
-2. **Import Maps** (polyfilled where needed via `es-module-shims`) for dynamic runtime dependency redirection.
-3. **Bundler Agnosticism**: Seamless integration with Angular's official esbuild builder without Webpack wrappers or custom plugin hacks.
-
-This repository is a reference implementation demonstrating how an enterprise Nx monorepo hosts independently built and run Micro Frontends (deployed together from one lockfile, so shared singletons always match), isolates runtime fault domains, and manages shared library singletons.
-
----
-
-## System Architecture & Topology
+## Architecture
 
 ```mermaid
-flowchart TD
-    subgraph Host ["Shell Application (Port 4200)"]
-        ShellBoot["Bootstrap & NF Orchestrator"]
-        Manifest["Runtime Manifest (federation.manifest.json)"]
-        Router["Dynamic Route Loader (.as<T>().loadRemoteModule)"]
-        Fallback["Fault Boundary (RemoteUnavailablePage)"]
+flowchart LR
+    subgraph shell["shell · host · :4200"]
+        main["main.ts<br/>fetch manifest, initFederation"]
+        router["Router<br/>one lazy route per remote"]
+        fallback["Fallback page<br/>/remote-unavailable"]
     end
 
-    subgraph Remotes ["Independent Micro Frontends"]
-        Dashboard["Dashboard Remote (Port 4201)\nExposes: ./Routes"]
-        Reports["Reports Remote (Port 4202)\nExposes: ./Routes"]
+    manifest[("federation.manifest.json")]
+
+    subgraph dashboard["dashboard · remote · :4201"]
+        dEntry["remoteEntry.json<br/>exposes ./Routes"]
     end
 
-    subgraph SharedDeps ["Shared Singletons & Contracts"]
-        AngularShared["@angular/* (Singletons, strictVersion)"]
-        ContractsLib["@client-portal/shared/demo-contracts (sharedMappings)"]
-        UiLib["@client-portal/shared/ui (sharedMappings)"]
+    subgraph reports["reports · remote · :4202"]
+        rEntry["remoteEntry.json<br/>exposes ./Routes"]
     end
 
-    Manifest -->|Resolves endpoints| Router
-    Router -->|Lazy load on /dashboard| Dashboard
-    Router -->|Lazy load on /reports| Reports
-    Router -.->|Network/Runtime Error| Fallback
-    Dashboard -.->|Consumes| SharedDeps
-    Reports -.->|Consumes| SharedDeps
-    ShellBoot -.->|Initializes & Shares| SharedDeps
+    subgraph shared["Shared once at runtime"]
+        ng["@angular/*, rxjs"]
+        libs["@client-portal/shared/ui<br/>@client-portal/shared/demo-contracts"]
+    end
+
+    main -->|reads| manifest
+    main --> router
+    router -->|"/dashboard"| dEntry
+    router -->|"/reports"| rEntry
+    router -.->|load fails| fallback
+    shell -.-> shared
+    dashboard -.-> shared
+    reports -.-> shared
 ```
 
-### Application Matrix
+The shell reads remote URLs from `federation.manifest.json` at runtime, so the same shell build can point at different remotes per environment. Angular and the shared workspace libraries load once and are used by all three apps.
 
-| Project              | Type          |  Port  | Route Endpoint                        | Exposed Contract                                               |    Standalone Runnable?     |
-| :------------------- | :------------ | :----: | :------------------------------------ | :------------------------------------------------------------- | :-------------------------: |
-| **`shell`**          | Dynamic Host  | `4200` | `/` (Home), `/dashboard`, `/reports`  | None (Consumer)                                                |             Yes             |
-| **`dashboard`**      | Remote MFE    | `4201` | `/` (Standalone), `/dashboard` (Host) | `./Routes` (`entry.routes.ts`)                                 |             Yes             |
-| **`reports`**        | Remote MFE    | `4202` | `/` (Standalone), `/reports` (Host)   | `./Routes` (`entry.routes.ts`)                                 |             Yes             |
-| **`demo-contracts`** | Workspace Lib |  N/A   | TypeScript path mapping               | Data contracts (`DEMO_BRAND`, interfaces)                      | Shared via `sharedMappings` |
-| **`ui`**             | Workspace Lib |  N/A   | TypeScript path mapping               | Shared page components (`Page`, `SectionHeading`, `DemoBadge`) | Shared via `sharedMappings` |
+|             Shell             |              Dashboard in the shell               |             Reports in the shell              |
+| :---------------------------: | :-----------------------------------------------: | :-------------------------------------------: |
+| ![Shell home](docs/shell.png) | ![Dashboard in the shell](docs/mfe-dashboard.png) | ![Reports in the shell](docs/mfe-reports.png) |
 
----
+## Quick start
 
-## Visual Showcase
-
-### 1. Integrated Portal Experience (Shell Orchestration)
-
-The Shell dynamically streams remote entries on navigation without full page reloads, mounting each remote into the Shell layout and navigation bar:
-
-|        Shell Home Landing        |
-| :------------------------------: |
-| ![Shell Landing](docs/shell.png) |
-
-|           Dashboard Remote in Shell           |          Reports Remote in Shell          |
-| :-------------------------------------------: | :---------------------------------------: |
-| ![Dashboard in Shell](docs/mfe-dashboard.png) | ![Reports in Shell](docs/mfe-reports.png) |
-
-### 2. Standalone Execution (Independent Development)
-
-Each remote is a fully sovereign Angular application with its own bootstrap, routing, and dev server, enabling isolated local iteration without running the Shell:
-
-| Standalone Dashboard (`localhost:4201`)  | Standalone Reports (`localhost:4202`) |
-| :--------------------------------------: | :-----------------------------------: |
-| ![Dashboard App](docs/app-dashboard.png) | ![Reports App](docs/app-reports.png)  |
-
----
-
-## Core Enterprise Highlights
-
-### 1. Dynamic Host with Externalized Manifest
-
-Instead of baking static remote entry URLs into application bundles at compile time, the host fetches `apps/shell/public/federation.manifest.json` at runtime and registers each remote lazily, on the first navigation to it, so startup fetches no remote entries:
-
-```json
-{
-  "dashboard": "http://localhost:4201/remoteEntry.json",
-  "reports": "http://localhost:4202/remoteEntry.json"
-}
-```
-
-> [!TIP]
-> **Zero Rebuild Deployments:** The exact same Shell container image or production build can be promoted across environments (Dev &rarr; Staging &rarr; Production) purely by mounting an environment-specific `federation.manifest.json` or serving it from an edge configuration service. Note that a plain `nx build shell` copies the development manifest (`localhost` URLs) into `dist/`, so replace it at deploy time (as `build:gh-pages` does).
-
-### 2. Strict Singleton & Version Negotiation
-
-Angular requires single instances of `@angular/core`, `@angular/common`, and the router to prevent injector context fragmentation:
-
-```javascript
-// apps/*/federation.config.mjs
-shared: fromPackageJson({
-  singleton: true,
-  strictVersion: true,
-  requiredVersion: 'auto',
-})
-  .skip(['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'])
-  .patch(['@angular/*'], {
-    includeSecondaries: { keepAll: true },
-  }),
-```
-
-### 3. Sharing Monorepo Libraries via `sharedMappings`
-
-Nx workspace libraries defined in `tsconfig.base.json` paths are shared at runtime through `sharedMappings`:
-
-```javascript
-sharedMappings: mappingsFromWorkspace({
-  singleton: true,
-  strictVersion: true,
-}).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
-```
-
-This avoids publishing internal packages to a private npm registry while ensuring identical memory instances across host and remotes.
-
-### 4. Fault Isolation & Recovery
-
-A failing remote never takes the Shell down:
-
-- **Startup:** remotes are registered lazily, so the Shell starts even when every remote is offline. Only a missing `federation.manifest.json` stops it; the Shell then shows a "could not start" message instead of a blank page.
-- **Navigation:** if a remote cannot be loaded, a router navigation error handler redirects to a `/remote-unavailable` page with **Try again** and **Back to home**.
-- **Recovery:** a failed load is not cached by the router, so the next visit (or **Try again**) registers and loads the remote again, without a page reload.
-
-```typescript
-// apps/shell/src/app/app.routes.ts
-const loadRemoteRoutes = (remoteName: string) => async () => {
-  const entry = manifest[remoteName];
-  if (!entry) {
-    throw new Error(`Remote '${remoteName}' is not listed in federation.manifest.json`);
-  }
-  await (typeof entry === 'string'
-    ? nf.initRemoteEntry(entry, remoteName)
-    : nf.initRemoteEntry(entry.url, { name: remoteName, integrity: entry.integrity }));
-  return loadRoutes(remoteName);
-};
-```
-
-### 5. Module Boundaries (Type & Scope Tags)
-
-`@nx/enforce-module-boundaries` checks every import against two tag dimensions, and lint (`pnpm lint:all`, the pre-commit hook and CI) fails on a violation:
-
-| Type           | May depend on                          |
-| -------------- | -------------------------------------- |
-| `type:app`     | `type:feature`, `type:ui`, `type:util` |
-| `type:feature` | `type:ui`, `type:util`                 |
-| `type:ui`      | `type:ui`, `type:util`                 |
-| `type:util`    | `type:util`                            |
-
-| Scope             | May depend on                     |
-| ----------------- | --------------------------------- |
-| `scope:shell`     | `scope:shell`, `scope:shared`     |
-| `scope:dashboard` | `scope:dashboard`, `scope:shared` |
-| `scope:reports`   | `scope:reports`, `scope:shared`   |
-| `scope:shared`    | `scope:shared`                    |
-
-- **Type** keeps dependencies pointing down the layers: a UI component can never import a feature.
-- **Scope** keeps each app's code private. Only `scope:shared` crosses apps, so the Shell cannot import a remote's code directly; it reaches remotes only at runtime through federation, which keeps them independently built.
-
-Current tags: `shell`, `dashboard` and `reports` are `type:app` with their own scope; `shared/ui` is `type:ui` and `shared/demo-contracts` is `type:util`, both `scope:shared`. Feature code still lives inside the apps (`apps/<remote>/src/app/features/`); when it moves into a library, tag it `type:feature` plus the remote's scope. A new project without matching tags fails lint until it is tagged.
-
-## Setup & Execution Guide
-
-### Prerequisites
-
-- **Node.js**: `^22.22.3`, `^24.15.0` or `>=26` (required by Angular 22; `.nvmrc` pins `24`)
-- **pnpm**: `v10.x` (`npm install --global pnpm`)
-- **Git**
-
-### 1. Installation
-
-Clone the repository and install dependencies using pnpm:
+Requirements: Node.js `^22.22.3`, `^24.15.0` or `>=26` (`.nvmrc` pins 24) and pnpm 10.
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/oleh-kazban/angular-nx-native-federation.git
 cd angular-nx-native-federation
 pnpm install
-```
-
-### 2. Start Applications (Local Development)
-
-Start the entire microfrontend ecosystem with a single command:
-
-```bash
 pnpm start:all
 ```
 
-This concurrently boots:
+Open http://localhost:4200. The remotes also run standalone at http://localhost:4201 and http://localhost:4202.
 
-- `shell` on `http://localhost:4200`
-- `dashboard` on `http://localhost:4201`
-- `reports` on `http://localhost:4202`
+## Commands
 
-Alternatively, start applications individually in separate terminals:
+| Command                                                  | What it does                                                                  |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `pnpm start:all`                                         | Serve the shell and both remotes in parallel                                  |
+| `pnpm start:shell`                                       | Serve the shell on port 4200                                                  |
+| `pnpm start:dashboard`                                   | Serve the dashboard remote on port 4201                                       |
+| `pnpm start:reports`                                     | Serve the reports remote on port 4202                                         |
+| `pnpm build:all`                                         | Production build of all apps into `dist/apps/<app>/browser`                   |
+| `pnpm build:shell` / `build:dashboard` / `build:reports` | Production build of one app                                                   |
+| `pnpm build:gh-pages`                                    | Build and assemble the GitHub Pages bundle in `dist/gh-pages/`                |
+| `pnpm test:all`                                          | Run all Jest tests                                                            |
+| `pnpm lint:all`                                          | Lint all projects with ESLint, including module boundary rules                |
+| `pnpm lint:affected`                                     | Lint only the projects affected by your changes (used by the pre-commit hook) |
+| `pnpm format`                                            | Format all files with Prettier                                                |
+| `pnpm format:uncommitted`                                | Format only uncommitted files                                                 |
+| `pnpm format:check`                                      | Check formatting without writing                                              |
+| `pnpm check:circular`                                    | Fail on circular imports (Madge)                                              |
+| `pnpm check:all`                                         | Full gate: format check, lint, tests, circular check and build (same as CI)   |
+| `pnpm graph`                                             | Open the Nx project graph in the browser                                      |
 
-```bash
-# Terminal 1: Shell
-pnpm start:shell        # or: pnpm nx serve shell
+Any Nx target also runs directly, for example `pnpm nx test shell` or `pnpm nx build reports --configuration=development`.
 
-# Terminal 2: Dashboard Remote
-pnpm start:dashboard    # or: pnpm nx serve dashboard
+## Tools
 
-# Terminal 3: Reports Remote
-pnpm start:reports      # or: pnpm nx serve reports
-```
+| Tool                                                                                                      | Why we use it                                                                                                        | What we expect from it                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Nx](https://nx.dev/)                                                                                     | Runs every task (serve, build, test, lint) across the five projects, caches results and knows the project graph.     | Repeated builds and tests come from cache; `nx affected` runs only what a change touches; `@nx/enforce-module-boundaries` stops apps from importing each other's code.                                     |
+| [pnpm](https://pnpm.io/)                                                                                  | Installs dependencies from one lockfile with a strict `node_modules`, so a package can only import what it declares. | Fast, reproducible installs (`pnpm install --frozen-lockfile` in CI); `packageManager` in `package.json` pins the pnpm version; dependency install scripts run only when allowed in `pnpm-workspace.yaml`. |
+| [Madge](https://github.com/pahen/madge)                                                                   | Builds the file-level import graph of `apps/` and `libs/` using the TypeScript path aliases.                         | `pnpm check:circular` fails on any import cycle, before it turns into an undefined import at runtime. Runs in `check:all` and CI.                                                                          |
+| [Husky](https://typicode.github.io/husky/) with [lint-staged](https://github.com/lint-staged/lint-staged) | Runs checks in a Git pre-commit hook.                                                                                | Every commit is formatted (Prettier on staged files only) and passes `pnpm lint:affected`. Never bypass the hook with `--no-verify`.                                                                       |
+| [ESLint](https://eslint.org/)                                                                             | Lints TypeScript and Angular templates (flat config with `angular-eslint`).                                          | No lint errors, selector prefixes per project (`shl`, `dsh`, `rpt`, `ui`), and module boundary violations fail the build.                                                                                  |
+| [Prettier](https://prettier.io/)                                                                          | Formats all code and docs with one shared style (`.prettierrc`).                                                     | No formatting discussions in review; `pnpm format:check` passes in CI. `eslint-config-prettier` keeps ESLint out of formatting.                                                                            |
 
-### 3. Production Builds
+## Documentation
 
-Build all applications in parallel:
+- [SETUP-GUIDE.md](SETUP-GUIDE.md): rebuild this repository step by step in a new, empty folder.
+- [ARCHITECTURE.md](ARCHITECTURE.md): technical details: runtime flow, the manifest, sharing, fault isolation, module boundaries, deployment and CI.
+- [`libs/shared/ui`](libs/shared/ui/README.md) and [`libs/shared/demo-contracts`](libs/shared/demo-contracts/README.md): the shared libraries.
 
-```bash
-pnpm build:all
-```
+## License
 
-Or build specific projects with production optimization:
-
-```bash
-pnpm nx build shell --configuration=production
-pnpm nx build dashboard --configuration=production
-pnpm nx build reports --configuration=production
-```
-
-The compiled output is located under `dist/apps/<app-name>/browser`, complete with each remote's `remoteEntry.json`.
-
-### 4. GitHub Pages Production Deployment
-
-To bundle all three applications for production hosting under GitHub Pages (`https://oleh-kazban.github.io/angular-nx-native-federation/`):
-
-```bash
-pnpm build:gh-pages
-```
-
-This automated pipeline:
-
-1. Builds `dashboard` and `reports` remotes with their dedicated subpath base hrefs (`/angular-nx-native-federation/remotes/<remote>/`).
-2. Builds `shell` with the root base href (`/angular-nx-native-federation/`).
-3. Assembles the production artifact tree into `dist/gh-pages/`.
-4. Generates the production `federation.manifest.json` with entries relative to the base href (for example `remotes/dashboard/remoteEntry.json`), so the bundle works on any origin. Set `BASE_HREF` to deploy under a different path.
-5. Injects `.nojekyll` to prevent GitHub Pages from filtering underscore-prefixed bundles (`_angular_*.js`).
-6. Copies `index.html` to `404.html` for client-side SPA routing on refresh. GitHub Pages serves that fallback with HTTP status 404, so deep links such as `/dashboard` render correctly but report 404 to crawlers and uptime monitors; a host with real SPA rewrites (or hash routing) avoids this.
-
-Automated continuous deployment is pre-configured via `.github/workflows/deploy.yml` on push to `master`. A `verify` job (format check, lint, tests, circular-dependency check, production build) runs first and must pass before the `deploy` job publishes to GitHub Pages; pull requests to `master`, and manual runs started from any other branch, run only `verify`.
-
----
-
-## Code Quality, Verification & DX
-
-| Task                  | Command               | Purpose                                                                    |
-| :-------------------- | :-------------------- | :------------------------------------------------------------------------- |
-| **Test**              | `pnpm test:all`       | Run all unit tests across the workspace with Jest (`jest-preset-angular`)  |
-| **Lint**              | `pnpm lint:all`       | Lint all projects using ESLint flat config (`eslint.config.mjs`)           |
-| **Format Check**      | `pnpm format:check`   | Verify codebase formatting with Prettier                                   |
-| **Format Write**      | `pnpm format`         | Auto-format all files with Prettier                                        |
-| **Circular Check**    | `pnpm check:circular` | Audit dependency tree with **Madge** to prevent architectural cycles       |
-| **Full Health Check** | `pnpm check:all`      | Comprehensive check: Format + Lint + Tests + Circular Dependencies + Build |
-| **Project Graph**     | `pnpm graph`          | Visualize Nx dependency graph and project boundaries                       |
-
-### AI Agent Configuration
-
-The repository ships configuration for several AI coding agents. Part of it is generated by Nx, which writes the same skills to the folder each agent reads, so `.agents/skills/` and `.github/skills/` are identical on purpose. Don't edit the generated files by hand: refresh them with `pnpm nx configure-ai-agents` (check their state with `pnpm nx configure-ai-agents --check=all`).
-
-| Path                                                                                            | Maintained by                                                                     |
-| :---------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
-| `AGENTS.md` (between the `nx configuration` markers), `.agents/`, `.github/skills/`, `.gemini/` | Nx (`nx configure-ai-agents`)                                                     |
-| `.github/agents/`, `.github/prompts/`                                                           | Nx (CI monitor agent and prompt)                                                  |
-| `.claude/settings.json`                                                                         | Project; enables the Nx Claude plugin and sets permissions                        |
-| `CLAUDE.md`, `.claude/skills/`                                                                  | Project; third-party skills in `.claude/skills/` are pinned in `skills-lock.json` |
-
----
-
-## Step-by-Step Monorepo Construction Reference
-
-If you are reconstructing this architecture from scratch or adopting it in an existing enterprise repository:
-
-1. **Nx Foundation**: Bootstrap an integrated monorepo with `pnpm dlx create-nx-workspace@latest client-portal` choosing Angular, esbuild, SCSS, and ESLint.
-2. **Generate Applications**: Generate the host (`shell`) and remotes (`dashboard`, `reports`) via `pnpm nx g @nx/angular:application apps/<name>`.
-3. **Workspace Contracts**: Create shared domain libraries via `pnpm nx g @nx/angular:library libs/shared/<name>`.
-4. **Install Native Federation**: Install `@angular-architects/native-federation` matching your Angular major release.
-5. **Initialize Remotes**: Run `pnpm nx g @angular-architects/native-federation:init --project=<remote> --port=<port> --type=remote`.
-6. **Initialize Dynamic Host**: Run `pnpm nx g @angular-architects/native-federation:init --project=shell --port=4200 --type=dynamic-host`.
-7. **Configure Sharing**: Define `shared` (package.json singletons) and `sharedMappings` (monorepo paths) in each `federation.config.mjs`.
-8. **Expose & Route**: Remotes export `./Routes`; Shell wires dynamic `loadRemoteModule` with resilience boundaries.
-
-> [!NOTE]
-> For the exhaustive, line-by-line configuration guide covering every file modification, build target mutation, and production hosting concern, see [SETUP-GUIDE.md](SETUP-GUIDE.md).
-
----
-
-## Official Documentation & References
-
-- [Nx Documentation](https://nx.dev)
-- [Angular Builders & esbuild](https://angular.dev/tools/cli/build-system)
-- [Native Federation Documentation](https://native-federation.com/)
-- [Nx Module Federation Migration Guide](https://nx.dev/docs/kb/migrate-angular-module-federation)
-- [Architecture & Setup Deep Dive](SETUP-GUIDE.md)
+[MIT](LICENSE)
