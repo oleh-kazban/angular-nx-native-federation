@@ -35,7 +35,7 @@ Modern Angular has transitioned to the official **Application Builder** (`@angul
 2. **Import Maps** (polyfilled where needed via `es-module-shims`) for dynamic runtime dependency redirection.
 3. **Bundler Agnosticism**: Seamless integration with Angular's official esbuild builder without Webpack wrappers or custom plugin hacks.
 
-This repository is a reference implementation demonstrating how an enterprise Nx monorepo hosts independently deployable Micro Frontends, isolates runtime fault domains, and manages shared library singletons.
+This repository is a reference implementation demonstrating how an enterprise Nx monorepo hosts independently built and run Micro Frontends (deployed together from one lockfile, so shared singletons always match), isolates runtime fault domains, and manages shared library singletons.
 
 ---
 
