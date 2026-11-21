@@ -49,7 +49,9 @@ jobs:
 
   deploy:
     needs: verify
-    if: github.event_name != 'pull_request'
+    # Only master deploys: pull requests (ref refs/pull/<n>/merge) and manual runs
+    # started from other branches stop after verify.
+    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       pages: write
