@@ -41,8 +41,6 @@ Thumbs.db
 .nx/cache
 .nx/workspace-data
 .nx/migrate-runs
-.claude/worktrees
-.claude/settings.local.json
 
 .angular
 
@@ -50,18 +48,18 @@ __screenshots__/
 
 # Local audit notes
 audit*.md
-.claude/*.md
 
 .nx/polygraph
 .playwright-mcp/
 
-# Agent handoff pipeline working state (see CLAUDE.md)
-.ai/tasks/
-
-# Generated AI agent files: restore with `pnpm nx configure-ai-agents` (see ARCHITECTURE.md)
+# Local AI agent configuration (not part of the project)
+.ai/
 .agents/
+.claude/
 .gemini/
-.github/skills/
 .github/agents/
 .github/prompts/
-.claude/skills/
+.github/skills/
+AGENTS.md
+CLAUDE.md
+skills-lock.json

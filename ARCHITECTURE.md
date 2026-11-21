@@ -238,20 +238,6 @@ Such a host must also provide:
 - A short cache lifetime for `remoteEntry.json` and `federation.manifest.json`, and long-lived caching for hashed bundles.
 - HTTPS.
 
-## AI agent configuration
-
-The repository commits only the source files for AI coding agents. The skill folders that tools generate are git-ignored, and you restore them locally.
-
-| Path                                                                             | Committed | Maintained by                                                                       |
-| -------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------- |
-| `CLAUDE.md`, `AGENTS.md`                                                         | Yes       | Project (Nx writes the block between the `nx configuration` markers in `AGENTS.md`) |
-| `.claude/settings.json`                                                          | Yes       | Project: enables the Nx Claude plugin and sets permissions                          |
-| `skills-lock.json`                                                               | Yes       | Pins the third-party skills installed into `.claude/skills/`                        |
-| `.agents/`, `.github/skills/`, `.github/agents/`, `.github/prompts/`, `.gemini/` | No        | Nx (`nx configure-ai-agents`)                                                       |
-| `.claude/skills/`                                                                | No        | Third-party skills from the sources in `skills-lock.json`                           |
-
-To restore the generated files, run `pnpm nx configure-ai-agents` and pick your agents. Check them with `pnpm nx configure-ai-agents --check=all`. To restore the Angular skills, reinstall them from [`angular/skills`](https://github.com/angular/skills) into `.claude/skills/`.
-
 ## References
 
 - [Native Federation for Angular](https://native-federation.com/docs/v4/angular-adapter/): [configuration](https://native-federation.com/docs/v4/angular-adapter/configuration/), [builder](https://native-federation.com/docs/v4/angular-adapter/builder/), [runtime](https://native-federation.com/docs/v4/angular-adapter/runtime/), [schematics](https://native-federation.com/docs/v4/angular-adapter/schematics/)
