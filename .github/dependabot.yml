@@ -15,8 +15,9 @@ updates:
         patterns: ['@angular-architects/native-federation', '@softarc/*']
       jest:
         patterns: ['jest', 'jest-*', '@types/jest', 'ts-jest']
-      typescript-eslint:
-        patterns: ['typescript-eslint', '@typescript-eslint/*']
+      # ESLint core, @eslint/js (required by the Nx flat configs) and typescript-eslint move together.
+      eslint:
+        patterns: ['eslint', '@eslint/*', 'typescript-eslint', '@typescript-eslint/*']
   - package-ecosystem: github-actions
     directory: /
     schedule:
