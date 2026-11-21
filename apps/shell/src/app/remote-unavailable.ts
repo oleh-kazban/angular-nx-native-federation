@@ -24,7 +24,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
   `,
   styleUrl: './remote-unavailable.scss',
 })
-export class RemoteUnavailableComponent {
+export class RemoteUnavailablePage {
   private readonly router = inject(Router);
 
   /** In-app URL whose navigation failed; only same-app absolute paths are accepted. */

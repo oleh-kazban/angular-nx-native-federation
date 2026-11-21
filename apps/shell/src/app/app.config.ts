@@ -1,4 +1,4 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withNavigationErrorHandler } from '@angular/router';
 import {
   type FederationManifest,
@@ -13,6 +13,7 @@ export const appConfig = (
   manifest: FederationManifest,
 ): ApplicationConfig => ({
   providers: [
+    provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes(nf, manifest), withNavigationErrorHandler(redirectToRemoteUnavailable)),
   ],
 });

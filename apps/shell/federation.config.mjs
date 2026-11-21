@@ -24,8 +24,6 @@ export default withNativeFederation({
     strictVersion: true,
   }).only(['@client-portal/shared/demo-contracts', '@client-portal/shared/ui']),
 
-  skip: ['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'],
-
   // Please read our docs about configuring native federation:
   // https://native-federation.com/docs/v4/angular-adapter/configuration/
 

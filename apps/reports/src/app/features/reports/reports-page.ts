@@ -4,7 +4,7 @@ import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
   imports: [Page, SectionHeading, DemoBadge],
-  selector: 'app-remote-reports-page',
+  selector: 'app-reports-page',
   template: `
     <lib-page
       class="reports-page"

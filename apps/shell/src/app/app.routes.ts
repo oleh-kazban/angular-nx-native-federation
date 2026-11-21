@@ -5,7 +5,7 @@ import {
 } from '@angular-architects/native-federation';
 
 import { HomePage } from './home-page';
-import { RemoteUnavailableComponent } from './remote-unavailable';
+import { RemoteUnavailablePage } from './remote-unavailable';
 
 interface RemoteRoutesModule {
   REMOTE_ROUTES: Routes;
@@ -52,7 +52,7 @@ export const appRoutes = (
     },
     {
       path: 'remote-unavailable',
-      component: RemoteUnavailableComponent,
+      component: RemoteUnavailablePage,
     },
     {
       path: '**',

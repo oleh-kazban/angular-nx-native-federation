@@ -708,7 +708,7 @@ import { Component } from '@angular/core';
 import { DEMO_BRAND } from '@client-portal/shared/demo-contracts';
 
 @Component({
-  selector: 'app-remote-reports-page',
+  selector: 'app-reports-page',
   template: `
     <section>
       <h1>Reports Remote</h1>
@@ -916,7 +916,7 @@ If the generated root component is named `AppComponent` or has a different filen
 `apps/shell/src/app/app.config.ts`:
 
 ```typescript
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withNavigationErrorHandler } from '@angular/router';
 import {
   type FederationManifest,
@@ -931,6 +931,7 @@ export const appConfig = (
   manifest: FederationManifest,
 ): ApplicationConfig => ({
   providers: [
+    provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes(nf, manifest), withNavigationErrorHandler(redirectToRemoteUnavailable)),
   ],
 });
@@ -1002,7 +1003,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
   `,
   styleUrl: './remote-unavailable.scss',
 })
-export class RemoteUnavailableComponent {
+export class RemoteUnavailablePage {
   private readonly router = inject(Router);
 
   /** In-app URL whose navigation failed; only same-app absolute paths are accepted. */
@@ -1036,7 +1037,7 @@ import {
 } from '@angular-architects/native-federation';
 
 import { HomePage } from './home-page';
-import { RemoteUnavailableComponent } from './remote-unavailable';
+import { RemoteUnavailablePage } from './remote-unavailable';
 
 interface RemoteRoutesModule {
   REMOTE_ROUTES: Routes;
@@ -1083,7 +1084,7 @@ export const appRoutes = (
     },
     {
       path: 'remote-unavailable',
-      component: RemoteUnavailableComponent,
+      component: RemoteUnavailablePage,
     },
     {
       path: '**',

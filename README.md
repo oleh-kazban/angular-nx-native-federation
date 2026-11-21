@@ -47,7 +47,7 @@ flowchart TD
         ShellBoot["Bootstrap & NF Orchestrator"]
         Manifest["Runtime Manifest (federation.manifest.json)"]
         Router["Dynamic Route Loader (.as<T>().loadRemoteModule)"]
-        Fallback["Fault Boundary (RemoteUnavailableComponent)"]
+        Fallback["Fault Boundary (RemoteUnavailablePage)"]
     end
 
     subgraph Remotes ["Independent Micro Frontends"]
