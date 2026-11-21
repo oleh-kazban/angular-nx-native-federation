@@ -212,12 +212,6 @@ Create a small shared API in `libs/shared/demo-contracts/src/index.ts`:
 
 ```typescript
 export const DEMO_BRAND = 'Client Portal';
-
-export interface RemoteInfo {
-  id: string;
-  name: string;
-  description: string;
-}
 ```
 
 Verify the import path in the root TypeScript configuration.

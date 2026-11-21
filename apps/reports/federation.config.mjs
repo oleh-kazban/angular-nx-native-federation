@@ -11,8 +11,6 @@ export default withNativeFederation({
     './Routes': './apps/reports/src/app/remote-entry/entry.routes.ts',
   },
 
-  //shareScope: autoShareScope({level: 'minor'}),
-
   shared: fromPackageJson({
     singleton: true,
     strictVersion: true,
@@ -25,7 +23,6 @@ export default withNativeFederation({
       },
     }),
 
-  //sharedMappings: mappingsFromWorkspace({ singleton: true }).filter(['@my-org/*']).get(),
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,

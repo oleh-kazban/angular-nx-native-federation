@@ -7,8 +7,6 @@ import {
 export default withNativeFederation({
   name: 'shell',
 
-  //shareScope: autoShareScope({level: 'minor'}),
-
   shared: fromPackageJson({
     singleton: true,
     strictVersion: true,
@@ -21,7 +19,6 @@ export default withNativeFederation({
       },
     }),
 
-  //sharedMappings: mappingsFromWorkspace({ singleton: true }).filter(['@my-org/*']).get(),
   sharedMappings: mappingsFromWorkspace({
     singleton: true,
     strictVersion: true,
