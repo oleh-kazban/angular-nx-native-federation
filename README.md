@@ -35,7 +35,7 @@ Modern Angular has transitioned to the official **Application Builder** (`@angul
 2. **Import Maps** (polyfilled where needed via `es-module-shims`) for dynamic runtime dependency redirection.
 3. **Bundler Agnosticism**: Seamless integration with Angular's official esbuild builder without Webpack wrappers or custom plugin hacks.
 
-This repository serves as a production-hardened reference implementation demonstrating how an enterprise Nx monorepo hosts independently deployable Micro Frontends, isolates runtime fault domains, and manages shared library singletons.
+This repository is a reference implementation demonstrating how an enterprise Nx monorepo hosts independently deployable Micro Frontends, isolates runtime fault domains, and manages shared library singletons.
 
 ---
 
@@ -110,7 +110,7 @@ Each remote is a fully sovereign Angular application with its own bootstrap, rou
 
 ### 1. Dynamic Host with Externalized Manifest
 
-Instead of baking static remote entry URLs into application bundles at compile time, the host fetches `apps/shell/public/federation.manifest.json` at runtime:
+Instead of baking static remote entry URLs into application bundles at compile time, the host fetches `apps/shell/public/federation.manifest.json` at runtime and registers each remote lazily, on the first navigation to it, so startup fetches no remote entries:
 
 ```json
 {
@@ -152,23 +152,26 @@ sharedMappings: mappingsFromWorkspace({
 
 This avoids publishing internal packages to a private npm registry while ensuring identical memory instances across host and remotes.
 
-### 4. Fault Domain Isolation & Circuit Breaking
+### 4. Fault Isolation & Recovery
 
-Remote failures do not cascade to crash the Shell. If a remote service goes down, the route loader safely catches the rejection and mounts a resilient fallback component:
+A failing remote never takes the Shell down:
+
+- **Startup:** remotes are registered lazily, so the Shell starts even when every remote is offline. Only a missing `federation.manifest.json` stops it; the Shell then shows a "could not start" message instead of a blank page.
+- **Navigation:** if a remote cannot be loaded, a router navigation error handler redirects to a `/remote-unavailable` page with **Try again** and **Back to home**.
+- **Recovery:** a failed load is not cached by the router, so the next visit (or **Try again**) registers and loads the remote again, without a page reload.
 
 ```typescript
 // apps/shell/src/app/app.routes.ts
-{
-  path: 'dashboard',
-  loadChildren: () =>
-    dashboardLoader
-      .loadRemoteModule('dashboard', './Routes')
-      .then((m) => m.REMOTE_ROUTES)
-      .catch((error) => {
-        console.error('Dashboard remote failed to load:', error);
-        return [{ path: '', component: RemoteUnavailableComponent }];
-      }),
-}
+const loadRemoteRoutes = (remoteName: string) => async () => {
+  const entry = manifest[remoteName];
+  if (!entry) {
+    throw new Error(`Remote '${remoteName}' is not listed in federation.manifest.json`);
+  }
+  await (typeof entry === 'string'
+    ? nf.initRemoteEntry(entry, remoteName)
+    : nf.initRemoteEntry(entry.url, { name: remoteName, integrity: entry.integrity }));
+  return loadRoutes(remoteName);
+};
 ```
 
 ## Setup & Execution Guide
@@ -262,7 +265,7 @@ Automated continuous deployment is pre-configured via `.github/workflows/deploy.
 | **Test**              | `pnpm test:all`       | Run all unit tests across the workspace with Jest (`jest-preset-angular`) |
 | **Lint**              | `pnpm lint:all`       | Lint all projects using ESLint flat config (`eslint.config.mjs`)          |
 | **Format Check**      | `pnpm format:check`   | Verify codebase formatting with Prettier                                  |
-| **Format Write**      | `pnpm format`         | Auto-format uncommitted or all files with Prettier                        |
+| **Format Write**      | `pnpm format`         | Auto-format all files with Prettier                                       |
 | **Circular Check**    | `pnpm check:circular` | Audit dependency tree with **Madge** to prevent architectural cycles      |
 | **Full Health Check** | `pnpm check:all`      | Comprehensive check: Format + Lint + Tests + Circular Dependencies        |
 | **Project Graph**     | `pnpm graph`          | Visualize Nx dependency graph and project boundaries                      |
