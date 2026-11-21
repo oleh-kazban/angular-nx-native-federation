@@ -61,7 +61,7 @@
     "jest": "30.3.0",
     "jest-environment-jsdom": "30.3.0",
     "jest-preset-angular": "17.0.0",
-    "jsdom": "27.1.0",
+    "jsdom": "31.0.1",
     "lint-staged": "17.6.0",
     "madge": "8.0.0",
     "nx": "24.0.6",
