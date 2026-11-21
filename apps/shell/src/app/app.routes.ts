@@ -4,14 +4,18 @@ import { type NativeFederationResult } from '@angular-architects/native-federati
 import { HomePage } from './home-page';
 import { RemoteUnavailableComponent } from './remote-unavailable';
 
-export const appRoutes = (nf: Pick<NativeFederationResult, 'as'>): Routes => {
-  const dashboardLoader = nf.as<{
-    REMOTE_ROUTES: Routes;
-  }>();
+interface RemoteRoutesModule {
+  REMOTE_ROUTES: Routes;
+}
 
-  const reportsLoader = nf.as<{
-    REMOTE_ROUTES: Routes;
-  }>();
+export const appRoutes = (nf: Pick<NativeFederationResult, 'as'>): Routes => {
+  const remoteLoader = nf.as<RemoteRoutesModule>();
+
+  // A rejected load is deliberately not caught here: the router only caches
+  // successful lazy loads, so letting it fail means the next navigation retries
+  // the remote. The navigation error handler shows the fallback page instead.
+  const loadRemoteRoutes = (remoteName: string) => () =>
+    remoteLoader.loadRemoteModule(remoteName, './Routes').then((remote) => remote.REMOTE_ROUTES);
 
   return [
     {
@@ -21,37 +25,15 @@ export const appRoutes = (nf: Pick<NativeFederationResult, 'as'>): Routes => {
     },
     {
       path: 'dashboard',
-      loadChildren: () =>
-        dashboardLoader
-          .loadRemoteModule('dashboard', './Routes')
-          .then((remote) => remote.REMOTE_ROUTES)
-          .catch((error) => {
-            console.error('Dashboard remote failed to load:', error);
-
-            return [
-              {
-                path: '',
-                component: RemoteUnavailableComponent,
-              },
-            ];
-          }),
+      loadChildren: loadRemoteRoutes('dashboard'),
     },
     {
       path: 'reports',
-      loadChildren: () =>
-        reportsLoader
-          .loadRemoteModule('reports', './Routes')
-          .then((remote) => remote.REMOTE_ROUTES)
-          .catch((error) => {
-            console.error('Reports remote failed to load:', error);
-
-            return [
-              {
-                path: '',
-                component: RemoteUnavailableComponent,
-              },
-            ];
-          }),
+      loadChildren: loadRemoteRoutes('reports'),
+    },
+    {
+      path: 'remote-unavailable',
+      component: RemoteUnavailableComponent,
     },
     {
       path: '**',

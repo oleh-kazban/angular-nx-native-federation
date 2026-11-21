@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter, Router, Routes, withNavigationErrorHandler } from '@angular/router';
 import { App } from './app';
 import { appRoutes } from './app.routes';
 import { HomePage } from './home-page';
+import { redirectToRemoteUnavailable } from './remote-navigation-error';
 
 @Component({ template: '<h1>Dashboard feature</h1>' })
 class DashboardStub {}
@@ -74,5 +75,44 @@ describe('shell home route', () => {
     expect(compiled.querySelector('main a[href="/dashboard"]')).toBeTruthy();
     expect(compiled.querySelector('main a[href="/reports"]')).toBeTruthy();
     expect(remoteLoads).toBe(0);
+  });
+});
+
+describe('shell remote failure', () => {
+  it('shows the fallback when a remote fails and retries it on the next navigation', async () => {
+    let calls = 0;
+    const loadRemoteModule = async () => {
+      calls++;
+      if (calls === 1) {
+        throw new Error('remote offline');
+      }
+      return { REMOTE_ROUTES: [{ path: '', component: DashboardStub }] as Routes };
+    };
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [
+        provideRouter(
+          appRoutes({ as: () => ({ loadRemoteModule, load: loadRemoteModule }) as never }),
+          withNavigationErrorHandler(redirectToRemoteUnavailable),
+        ),
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    await router.navigateByUrl('/dashboard');
+    await fixture.whenStable();
+    expect(router.url).toBe('/remote-unavailable?from=%2Fdashboard');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Remote application unavailable');
+
+    compiled.querySelector<HTMLButtonElement>('main button')?.click();
+    await fixture.whenStable();
+    expect(calls).toBe(2);
+    expect(router.url).toBe('/dashboard');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Dashboard feature');
   });
 });
