@@ -52,8 +52,16 @@ __screenshots__/
 audit*.md
 .claude/*.md
 
-.nx/polygraph.ai/tasks/
+.nx/polygraph
 .playwright-mcp/
 
 # Agent handoff pipeline working state (see CLAUDE.md)
 .ai/tasks/
+
+# Generated AI agent files: restore with `pnpm nx configure-ai-agents` (see ARCHITECTURE.md)
+.agents/
+.gemini/
+.github/skills/
+.github/agents/
+.github/prompts/
+.claude/skills/

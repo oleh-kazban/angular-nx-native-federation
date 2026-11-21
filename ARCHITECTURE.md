@@ -240,14 +240,17 @@ Such a host must also provide:
 
 ## AI agent configuration
 
-The repository ships configuration for several AI coding agents. Nx generates part of it and writes the same skills into each agent's folder, so `.agents/skills/` and `.github/skills/` are identical on purpose. Don't edit generated files by hand: refresh them with `pnpm nx configure-ai-agents` and check them with `pnpm nx configure-ai-agents --check=all`.
+The repository commits only the source files for AI coding agents. The skill folders that tools generate are git-ignored, and you restore them locally.
 
-| Path                                                                                            | Maintained by                                                                     |
-| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `AGENTS.md` (between the `nx configuration` markers), `.agents/`, `.github/skills/`, `.gemini/` | Nx (`nx configure-ai-agents`)                                                     |
-| `.github/agents/`, `.github/prompts/`                                                           | Nx (CI monitor agent and prompt)                                                  |
-| `.claude/settings.json`                                                                         | Project: enables the Nx Claude plugin and sets permissions                        |
-| `CLAUDE.md`, `.claude/skills/`                                                                  | Project: third-party skills in `.claude/skills/` are pinned in `skills-lock.json` |
+| Path                                                                             | Committed | Maintained by                                                                       |
+| -------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------- |
+| `CLAUDE.md`, `AGENTS.md`                                                         | Yes       | Project (Nx writes the block between the `nx configuration` markers in `AGENTS.md`) |
+| `.claude/settings.json`                                                          | Yes       | Project: enables the Nx Claude plugin and sets permissions                          |
+| `skills-lock.json`                                                               | Yes       | Pins the third-party skills installed into `.claude/skills/`                        |
+| `.agents/`, `.github/skills/`, `.github/agents/`, `.github/prompts/`, `.gemini/` | No        | Nx (`nx configure-ai-agents`)                                                       |
+| `.claude/skills/`                                                                | No        | Third-party skills from the sources in `skills-lock.json`                           |
+
+To restore the generated files, run `pnpm nx configure-ai-agents` and pick your agents. Check them with `pnpm nx configure-ai-agents --check=all`. To restore the Angular skills, reinstall them from [`angular/skills`](https://github.com/angular/skills) into `.claude/skills/`.
 
 ## References
 
